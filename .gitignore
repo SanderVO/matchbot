@@ -14,3 +14,10 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+/vendor/
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Database
+./mysql/**/*
