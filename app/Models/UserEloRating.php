@@ -5,12 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Event extends Model
+class UserEloRating extends Model
 {
     use HasFactory;
-    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -18,11 +16,10 @@ class Event extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'status',
-        'start_date',
-        'end_date',
-        'event_type_id',
-        'season_id'
+        'elo_rating',
+        'type',
+        'user_id',
+        'event_id'
     ];
 
     /**
@@ -31,33 +28,33 @@ class Event extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
-     * Event type
+     * User relationship
      *
      * @return BelongsTo
      * 
      * @author Sander van Ooijen <sandervo+github@proton.me>
      * @version 1.0.0
      */
-    public function eventType(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(EventType::class, 'event_type_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
-     * Season relationship
+     * Event relationship
      *
      * @return BelongsTo
      * 
      * @author Sander van Ooijen <sandervo+github@proton.me>
      * @version 1.0.0
      */
-    public function season(): BelongsTo
+    public function event(): BelongsTo
     {
-        return $this->belongsTo(Season::class, 'season_id');
+        return $this->belongsTo(Event::class, 'event_id');
     }
 }

@@ -13,25 +13,23 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('events', function (Blueprint $table) {
+        Schema::create('user_elo_ratings', function (Blueprint $table) {
             $table->id();
-            $table->tinyInteger('status');
-            $table->dateTime('start_date');
-            $table->dateTime('end_date');
-            $table->unsignedBigInteger('event_type_id');
-            $table->unsignedBigInteger('season_id');
+            $table->integer('elo_rating');
+            $table->tinyInteger('type');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('event_id');
             $table->timestamps();
-            $table->softDeletes();
 
             $table
-                ->foreign('event_type_id')
+                ->foreign('user_id')
                 ->references('id')
-                ->on('event_types');
+                ->on('users');
 
             $table
-                ->foreign('season_id')
+                ->foreign('event_id')
                 ->references('id')
-                ->on('seasons');
+                ->on('events');
         });
     }
 
@@ -42,6 +40,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('events');
+        Schema::dropIfExists('user_elo_ratings');
     }
 };
