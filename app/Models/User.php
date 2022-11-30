@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -54,15 +55,28 @@ class User extends Authenticatable
     }
 
     /**
-     * Event participants relationship
+     * Team result users relationship
      *
      * @return HasMany
      * 
      * @author Sander van Ooijen <sandervo+github@proton.me>
      * @version 1.0.0
      */
-    public function eventParticipants(): HasMany
+    public function teamResultUsers(): HasMany
     {
-        return $this->hasMany(EventParticipant::class, 'user_id');
+        return $this->hasMany(TeamResultUser::class, 'user_id');
+    }
+
+    /**
+     * Teams relationship
+     *
+     * @return HasManyThrough
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
+     */
+    public function teams(): HasManyThrough
+    {
+        return $this->hasManyThrough(Team::class, 'team_user');
     }
 }

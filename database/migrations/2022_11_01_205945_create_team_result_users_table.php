@@ -13,24 +13,24 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('user_elo_ratings', function (Blueprint $table) {
+        Schema::create('team_result_users', function (Blueprint $table) {
             $table->id();
-            $table->integer('elo_rating');
-            $table->string('objectable_type')->nullable();
-            $table->unsignedBigInteger('objectable_id')->nullable();
+            $table->integer('score')->nullable();
+            $table->integer('crawl_score')->nullable();
+            $table->unsignedBigInteger('team_result_id');
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('event_id');
             $table->timestamps();
+            $table->softDeletes();
+
+            $table
+                ->foreign('team_result_id')
+                ->references('id')
+                ->on('team_results');
 
             $table
                 ->foreign('user_id')
                 ->references('id')
                 ->on('users');
-
-            $table
-                ->foreign('event_id')
-                ->references('id')
-                ->on('events');
         });
     }
 
@@ -41,6 +41,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_elo_ratings');
+        Schema::dropIfExists('team_users');
     }
 };

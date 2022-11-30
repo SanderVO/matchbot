@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Team extends Model
@@ -45,15 +46,15 @@ class Team extends Model
     }
 
     /**
-     * Event participants relationship
+     * Users relationship
      *
-     * @return HasMany
+     * @return HasManyThrough
      * 
      * @author Sander van Ooijen <sandervo+github@proton.me>
      * @version 1.0.0
      */
-    public function eventParticipants(): HasMany
+    public function users(): HasManyThrough
     {
-        return $this->hasMany(EventParticipant::class, 'team_id');
+        return $this->hasManyThrough(User::class, 'team_user');
     }
 }

@@ -17,7 +17,8 @@ class UserEloRating extends Model
      */
     protected $fillable = [
         'elo_rating',
-        'type',
+        'objectable_type',
+        'objectable_id',
         'user_id',
         'event_id'
     ];

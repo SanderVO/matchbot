@@ -5,10 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class TeamResult extends Model
+class TeamResultUser extends Model
 {
     use HasFactory;
     use SoftDeletes;
@@ -21,9 +20,8 @@ class TeamResult extends Model
     protected $fillable = [
         'score',
         'crawl_score',
-        'comment',
-        'team_id',
-        'event_id'
+        'team_result_id',
+        'user_id'
     ];
 
     /**
@@ -37,41 +35,28 @@ class TeamResult extends Model
     ];
 
     /**
-     * Team relationship
+     * Team Result relationship
      *
      * @return BelongsTo
      * 
      * @author Sander van Ooijen <sandervo+github@proton.me>
      * @version 1.0.0
      */
-    public function team(): BelongsTo
+    public function teamResult(): BelongsTo
     {
-        return $this->belongsTo(Team::class, 'team_id');
+        return $this->belongsTo(TeamResult::class, 'team_result_id');
     }
 
     /**
-     * Event relationship
+     * User relationship
      *
      * @return BelongsTo
      * 
      * @author Sander van Ooijen <sandervo+github@proton.me>
      * @version 1.0.0
      */
-    public function event(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(Event::class, 'event_id');
-    }
-
-    /**
-     * Team result users relationship
-     *
-     * @return HasMany
-     * 
-     * @author Sander van Ooijen <sandervo+github@proton.me>
-     * @version 1.0.0
-     */
-    public function teamResultUsers(): HasMany
-    {
-        return $this->hasMany(TeamResultUser::class, 'team_result_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
