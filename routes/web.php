@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,3 +23,8 @@ Route::get('/', function () {
 Route::resource('users', UserController::class);
 
 Route::resource('events', EventController::class);
+
+Route::resource('organizations', OrganizationController::class)
+    ->only([
+        'index'
+    ]);

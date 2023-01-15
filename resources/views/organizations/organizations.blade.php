@@ -4,16 +4,6 @@
 
 <h1>{{ $name }}</h1>
 
-<div>
-    <ul>
-        @forelse ($users as $user)
-        <li>{{ $user->username }}</li>
-        @empty
-        <p>Geen gebruikers gevonden</p>
-        @endforelse
-    </ul>
-</div>
-
 <button type="button" class="px-6
       py-2.5
       bg-blue-600
@@ -29,15 +19,15 @@
       active:bg-blue-800 active:shadow-lg
       transition
       duration-150
-      ease-in-out" @click="createUserModalVisible = true">
-    Launch demo modal
+      ease-in-out" @click="createOrganizationModalVisible = true">
+    Create organization
 </button>
 
-<div class="absolute z-10 bg-white max-w-lg mx-auto top-0 left-0 right-0 bottom-0 my-16 p-8 rounded drop-shadow-lg h-full"
-    role="dialog" tabindex="-1" x-show="createUserModalVisible" x-cloak x-transition>
-    <livewire:create-user />
-</div>
+<livewire:organization-table />
 
-{{ $users->links() }}
+<div class="absolute z-10 bg-white max-w-lg mx-auto top-0 left-0 right-0 bottom-0 my-16 p-8 rounded drop-shadow-lg h-full"
+    role="dialog" tabindex="-1" x-show="createOrganizationModalVisible" x-cloak x-transition>
+    <livewire:create-organization />
+</div>
 
 @endsection

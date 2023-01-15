@@ -24,7 +24,7 @@ class UserController extends Controller
         $users = User::query()
             ->paginate((int) $request->query('limit'));
 
-        return View::make('users.users', ['name' => 'users', 'users' => $users]);
+        return View::make('users.users', ['name' => 'Alle gebruikers', 'users' => $users]);
     }
 
     /**
@@ -51,12 +51,14 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param User $user
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
      */
-    public function show($id)
+    public function show(User $user): FacadeView
     {
-        //
+        return View::make('users.user', ['user' => $user]);
     }
 
     /**
