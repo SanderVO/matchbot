@@ -7,11 +7,11 @@
                 </th>
 
                 <th class="text-left border-b border-slate-100 p-4">
-                    Name
+                    Type
                 </th>
 
                 <th class="text-left border-b border-slate-100 p-4">
-                    Deelnemers
+                    Season
                 </th>
 
                 <th class="text-left border-b border-slate-100 p-4">
@@ -21,31 +21,31 @@
         </thead>
 
         <tbody>
-            @forelse ($organizations as $organization)
+            @forelse ($events as $event)
             <tr>
                 <td class="text-left border-b border-slate-100 p-4">
-                    {{ $organization->id }}
+                    {{ $event->id }}
                 </td>
 
                 <td class="text-left border-b border-slate-100 p-4">
-                    {{ $organization->name }}
+                    {{ $event->eventType->name }}
                 </td>
 
                 <td class="text-left border-b border-slate-100 p-4">
-                    {{ $organization->users_count }}
+                    {{ $event->season->name }}
                 </td>
 
                 <td class="text-left border-b border-slate-100 p-4">
-                    {{ $organization->created_at }}
+                    {{ $event->created_at }}
                 </td>
             </tr>
             @empty
             <tr>
-                <td class="border-b border-slate-100 p-4">No organizations found</td>
+                <td class="border-b border-slate-100 p-4">No events found</td>
             </tr>
             @endforelse
         </tbody>
     </table>
 
-    {{ $organizations->links('pagination::tailwind') }}
+    {{ $events->links('pagination::tailwind') }}
 </div>

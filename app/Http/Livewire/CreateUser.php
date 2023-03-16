@@ -22,11 +22,6 @@ class CreateUser extends Component
             'string',
             'email'
         ],
-        'user.password' => [
-            'required',
-            'string',
-            'min:8'
-        ],
         'user.organization_id' => [
             'required',
             'numeric',
@@ -48,6 +43,10 @@ class CreateUser extends Component
     {
         $this->organizations = Organization::query()
             ->get();
+
+        $this->user = new User([
+            'organization_id' => $this->organizations[0]->id
+        ]);
     }
 
     /**

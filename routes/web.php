@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\SeasonController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,11 +21,22 @@ Route::get('/', function () {
     return view('home');
 });
 
-Route::resource('users', UserController::class);
+Route::resource('users', UserController::class)
+    ->only([
+        'index'
+    ]);
 
-Route::resource('events', EventController::class);
+Route::resource('events', EventController::class)
+    ->only([
+        'index'
+    ]);
 
 Route::resource('organizations', OrganizationController::class)
+    ->only([
+        'index'
+    ]);
+
+Route::resource('seasons', SeasonController::class)
     ->only([
         'index'
     ]);

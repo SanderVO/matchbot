@@ -13,7 +13,8 @@
     @livewireStyles
 </head>
 
-<body x-data="{sidebarVisible: true, createUserModalVisible: false, createOrganizationModalVisible: false}">
+<body
+    x-data="{sidebarVisible: true, createUserModalVisible: false, createOrganizationModalVisible: false, createSeasonModalVisible: false, createEventModalVisible: false}">
     @include('layout.header')
 
     @include('layout.sidebar')

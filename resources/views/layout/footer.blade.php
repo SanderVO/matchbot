@@ -1,3 +1,3 @@
-<footer class="relative w-full flex bg-white p-4">
-    <div>Footer</div>
+<footer class="relative w-full flex p-4 mt-8">
+    <div class="container">Footer</div>
 </footer>

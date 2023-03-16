@@ -11,41 +11,33 @@
                 </th>
 
                 <th class="text-left border-b border-slate-100 p-4">
-                    Deelnemers
-                </th>
-
-                <th class="text-left border-b border-slate-100 p-4">
                     Aangemaakt op
                 </th>
             </tr>
         </thead>
 
         <tbody>
-            @forelse ($organizations as $organization)
+            @forelse ($seasons as $season)
             <tr>
                 <td class="text-left border-b border-slate-100 p-4">
-                    {{ $organization->id }}
+                    {{ $season->id }}
                 </td>
 
                 <td class="text-left border-b border-slate-100 p-4">
-                    {{ $organization->name }}
+                    {{ $season->name }}
                 </td>
 
                 <td class="text-left border-b border-slate-100 p-4">
-                    {{ $organization->users_count }}
-                </td>
-
-                <td class="text-left border-b border-slate-100 p-4">
-                    {{ $organization->created_at }}
+                    {{ $season->created_at }}
                 </td>
             </tr>
             @empty
             <tr>
-                <td class="border-b border-slate-100 p-4">No organizations found</td>
+                <td class="border-b border-slate-100 p-4">No seasons found</td>
             </tr>
             @endforelse
         </tbody>
     </table>
 
-    {{ $organizations->links('pagination::tailwind') }}
+    {{ $seasons->links('pagination::tailwind') }}
 </div>

@@ -2,30 +2,30 @@
 
 namespace App\Http\Livewire;
 
-use App\Models\Organization;
+use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class OrganizationTable extends Component
+class UserTable extends Component
 {
     use WithPagination;
 
     protected $listeners = [
-        'refreshOrganizations' => 'loadOrganizations'
+        'refreshUsers' => 'loadUsers'
     ];
 
-    protected $organizations;
+    protected $users;
 
     public function mount()
     {
-        $this->loadOrganizations();
+        $this->loadUsers();
     }
 
-    public function loadOrganizations()
+    public function loadUsers()
     {
-        $this->organizations = Organization::query()
-            ->withCount([
-                'users'
+        $this->users = User::query()
+            ->with([
+                'organization'
             ])
             ->orderBy(
                 'name',
@@ -37,9 +37,9 @@ class OrganizationTable extends Component
     public function render()
     {
         return view(
-            'livewire.organization-table',
+            'livewire.user-table',
             [
-                'organizations' => $this->organizations
+                'users' => $this->users
             ]
         );
     }

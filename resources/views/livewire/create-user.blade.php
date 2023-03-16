@@ -32,22 +32,6 @@
     </div>
 
     <div class="mb-4">
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
-            Password
-        </label>
-
-        <input wire:model="user.password"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="password" type="password" placeholder="Password">
-
-        @error('user.password')
-        <div class="bg-red-600 w-100 p-4 mt-4 color-white rounded text-white">
-            {{ $message }}
-        </div>
-        @enderror
-    </div>
-
-    <div class="mb-4">
         <label class="block text-gray-700 text-sm font-bold mb-2" for="organizationId">
             Organization
         </label>

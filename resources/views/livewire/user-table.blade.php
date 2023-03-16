@@ -11,7 +11,7 @@
                 </th>
 
                 <th class="text-left border-b border-slate-100 p-4">
-                    Deelnemers
+                    Organisatie
                 </th>
 
                 <th class="text-left border-b border-slate-100 p-4">
@@ -21,31 +21,31 @@
         </thead>
 
         <tbody>
-            @forelse ($organizations as $organization)
+            @forelse ($users as $user)
             <tr>
                 <td class="text-left border-b border-slate-100 p-4">
-                    {{ $organization->id }}
+                    {{ $user->id }}
                 </td>
 
                 <td class="text-left border-b border-slate-100 p-4">
-                    {{ $organization->name }}
+                    {{ $user->name }}
                 </td>
 
                 <td class="text-left border-b border-slate-100 p-4">
-                    {{ $organization->users_count }}
+                    {{ $user->organization->name }}
                 </td>
 
                 <td class="text-left border-b border-slate-100 p-4">
-                    {{ $organization->created_at }}
+                    {{ $user->created_at }}
                 </td>
             </tr>
             @empty
             <tr>
-                <td class="border-b border-slate-100 p-4">No organizations found</td>
+                <td class="border-b border-slate-100 p-4">No users found</td>
             </tr>
             @endforelse
         </tbody>
     </table>
 
-    {{ $organizations->links('pagination::tailwind') }}
+    {{ $users->links('pagination::tailwind') }}
 </div>

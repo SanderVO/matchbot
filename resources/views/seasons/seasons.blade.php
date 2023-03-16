@@ -20,19 +20,19 @@
       active:bg-blue-800 active:shadow-lg
       transition
       duration-150
-      ease-in-out" @click="createEventModalVisible = true">
-        Create event
+      ease-in-out" @click="createSeasonModalVisible = true">
+        Create season
     </button>
 </div>
 
-<livewire:event-table />
+<livewire:season-table />
 
 <div class="absolute z-10 bg-white max-w-lg mx-auto top-0 left-0 right-0 bottom-0 my-16 p-8 rounded drop-shadow-lg h-full"
-    role="dialog" tabindex="-1" :class="{ 'hidden': !createEventModalVisible }" x-show="createEventModalVisible"
-    x-on:click.away="createEventModalVisible = false" x-cloak x-transition>
-    <livewire:create-event />
+    role="dialog" tabindex="-1" :class="{ 'hidden': !createSeasonModalVisible }" x-show="createSeasonModalVisible"
+    x-on:click.away="createSeasonModalVisible = false" x-cloak x-transition>
+    <livewire:create-season />
 </div>
 
-<div class="overlay" x-show="createEventModalVisible" x-cloak></div>
+<div class="overlay" x-show="createSeasonModalVisible" x-cloak></div>
 
 @endsection

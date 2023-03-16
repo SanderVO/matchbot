@@ -17,9 +17,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('authorization_type');
-            $table->string('authorization_token');
-            $table->string('authorization_user_id');
+            $table->string('authorization_type')->nullable();
+            $table->string('authorization_token')->nullable();
+            $table->string('authorization_user_id')->nullable();
             $table->unsignedBigInteger('organization_id');
             $table->timestamps();
 

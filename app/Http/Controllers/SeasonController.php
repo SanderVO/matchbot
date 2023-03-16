@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\View;
 use Illuminate\Contracts\View\View as FacadeView;
 
-class UserController extends Controller
+class SeasonController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,9 +18,9 @@ class UserController extends Controller
     public function index(): FacadeView
     {
         return View::make(
-            'users.users',
+            'seasons.seasons',
             [
-                'name' => 'Users'
+                'name' => 'Seasons'
             ]
         );
     }
