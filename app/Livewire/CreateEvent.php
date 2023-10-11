@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Http\Livewire;
+namespace App\Livewire;
 
-use App\Models\Organization;
+use App\Models\Event;
 use Livewire\Component;
 
-class CreateOrganization extends Component
+class CreateEvent extends Component
 {
-    public Organization $organization;
+    public Event $event;
 
     protected $rules = [
-        'organization.name' => [
+        'event.name' => [
             'required',
             'string'
         ],
@@ -26,11 +26,11 @@ class CreateOrganization extends Component
      */
     public function mount()
     {
-        $this->organization = new Organization();
+        $this->event = new Event();
     }
 
     /**
-     * Save organization action
+     * Save event action
      * 
      * @author Sander van Ooijen <sandervo+github@proton.me>
      * @version 1.0.0
@@ -39,11 +39,11 @@ class CreateOrganization extends Component
     {
         $this->validate();
 
-        $this->organization->save();
+        $this->event->save();
 
         $this->saveIsSuccessful = true;
 
-        $this->emitTo('organization-table', 'refreshOrganizations');
+        $this->dispatch('refreshEvents')->to('event-table');
     }
 
     /**
@@ -56,6 +56,6 @@ class CreateOrganization extends Component
      */
     public function render()
     {
-        return view('livewire.create-organization');
+        return view('livewire.create-event');
     }
 }

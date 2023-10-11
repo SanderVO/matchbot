@@ -23,10 +23,10 @@ class EventTypeFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->word(),
+            'name' => fake()->name(),
             'event_type_sport_id' => EventTypeSport::factory(),
-            'created_at' => $this->faker->date(),
-            'updated_at' => $this->faker->date()
+            'created_at' => fake()->date(),
+            'updated_at' => fake()->date()
         ];
     }
 }

@@ -4,9 +4,16 @@ namespace Tests\Unit\Jobs;
 
 use App\Jobs\CalculateEloRatingJob;
 use App\Models\Event;
-use App\Models\EventParticipant;
+use App\Models\Season;
+use App\Models\Team;
+use App\Models\TeamResult;
+use App\Models\TeamResultUser;
+use App\Models\TeamUser;
 use App\Models\User;
-use PHPUnit\Framework\TestCase;
+use App\Models\UserEloRating;
+use Carbon\Carbon;
+use Tests\TestCase;
+
 
 class CreateEloRatingJobTest extends TestCase
 {
@@ -19,9 +26,14 @@ class CreateEloRatingJobTest extends TestCase
     public function testCanCalculateGeneralEloRatingForTwoPlayersWithoutScore(): void
     {
         // Arrange
+        $season = Season::factory()
+            ->create();
+
         $event = Event::factory()
             ->create([
-                'status' => 1
+                'season_id' => $season->id,
+                'status' => 1,
+                'created_at' => Carbon::now()->subDay(1)
             ]);
 
         $user = User::factory()
@@ -30,17 +42,49 @@ class CreateEloRatingJobTest extends TestCase
         $opponent = User::factory()
             ->create();
 
-        EventParticipant::factory()
+        $team = Team::factory()
+            ->create();
+
+        $oponentTeam = Team::factory()
+            ->create();
+
+        TeamUser::factory()
             ->create([
-                'event_id' => $event->id,
+                'user_id' => $user->id,
+                'team_id' => $team->id
+            ]);
+
+        TeamUser::factory()
+            ->create([
+                'user_id' => $opponent->id,
+                'team_id' => $oponentTeam->id
+            ]);
+
+        $teamResult = TeamResult::factory()
+            ->create([
                 'score' => 10,
+                'team_id' => $team->id,
+                'event_id' => $event->id
+            ]);
+
+        $opponentTeamResult = TeamResult::factory()
+            ->create([
+                'score' => 5,
+                'team_id' => $oponentTeam->id,
+                'event_id' => $event->id
+            ]);
+
+        TeamResultUser::factory()
+            ->create([
+                'score' => 10,
+                'team_result_id' => $teamResult->id,
                 'user_id' => $user->id
             ]);
 
-        EventParticipant::factory()
+        TeamResultUser::factory()
             ->create([
-                'event_id' => $event->id,
                 'score' => 5,
+                'team_result_id' => $opponentTeamResult->id,
                 'user_id' => $opponent->id
             ]);
 
@@ -49,6 +93,6 @@ class CreateEloRatingJobTest extends TestCase
         $job->handle();
 
         // Assert
-
+        dd(UserEloRating::get()->toArray());
     }
 }

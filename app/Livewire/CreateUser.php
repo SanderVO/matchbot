@@ -1,35 +1,26 @@
 <?php
 
-namespace App\Http\Livewire;
+namespace App\Livewire;
 
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
+use Livewire\Attributes\Rule;
 
 class CreateUser extends Component
 {
-    public User $user;
-
-    protected $rules = [
-        'user.name' => [
-            'required',
-            'string'
-        ],
-        'user.email' => [
-            'required',
-            'string',
-            'email'
-        ],
-        'user.organization_id' => [
-            'required',
-            'numeric',
-            'exists:organizations,id'
-        ]
-    ];
-
     public Collection $organizations;
+
+    #[Rule('required|string')]
+    public string $name = '';
+
+    #[Rule('required|string')]
+    public string $email = '';
+
+    #[Rule('required|numeric|exists:organizations,id')]
+    public ?int $organization_id = null;
 
     public bool $saveIsSuccessful = false;
 
@@ -44,9 +35,7 @@ class CreateUser extends Component
         $this->organizations = Organization::query()
             ->get();
 
-        $this->user = new User([
-            'organization_id' => $this->organizations[0]->id
-        ]);
+        $this->organization_id = $this->organizations[0]->id;
     }
 
     /**
@@ -59,7 +48,19 @@ class CreateUser extends Component
     {
         $this->validate();
 
-        $this->user->save();
+        User::create(
+            $this->only(['name', 'email', 'organization_id'])
+        );
+
+        $this->saveIsSuccessful = true;
+
+        $this->dispatch('refreshUsers')
+            ->to('user-table');
+
+        $this->dispatchBrowserEvent('close-modal')
+            ->to('user-table');
+
+        $this->dispatch('user-created');
     }
 
     /**

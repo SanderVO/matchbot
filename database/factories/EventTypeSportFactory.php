@@ -22,9 +22,9 @@ class EventTypeSportFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->word(),
-            'created_at' => $this->faker->date(),
-            'updated_at' => $this->faker->date()
+            'name' => fake()->name(),
+            'created_at' => fake()->date(),
+            'updated_at' => fake()->date()
         ];
     }
 }

@@ -1,33 +1,17 @@
 <?php
 
-namespace App\Http\Livewire;
+namespace App\Livewire;
 
 use App\Models\Season;
 use Livewire\Component;
+use Livewire\Attributes\Rule;
 
 class CreateSeason extends Component
 {
-    public Season $season;
-
-    protected $rules = [
-        'season.name' => [
-            'required',
-            'string'
-        ],
-    ];
+    #[Rule('required|string')]
+    public string $name = '';
 
     public bool $saveIsSuccessful = false;
-
-    /**
-     * On component mount
-     * 
-     * @author Sander van Ooijen <sandervo+github@proton.me>
-     * @version 1.0.0
-     */
-    public function mount()
-    {
-        $this->season = new Season();
-    }
 
     /**
      * Save season action
@@ -39,11 +23,16 @@ class CreateSeason extends Component
     {
         $this->validate();
 
-        $this->season->save();
+        Season::create(
+            $this->only(['name'])
+        );
 
         $this->saveIsSuccessful = true;
 
-        $this->emitTo('season-table', 'refreshSeasons');
+        $this->dispatch('refreshSeasons')
+            ->to('season-table');
+
+        $this->dispatch('season-created');
     }
 
     /**

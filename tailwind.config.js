@@ -6,6 +6,17 @@ module.exports = {
         "./resources/**/*.vue",
     ],
     theme: {
+        colors: {
+            transparent: "transparent",
+            current: "currentColor",
+            gray: "#294D61",
+            white: "white",
+            "green-white": "#6DA5C0",
+            morning: "#0F969C",
+            day: "#0C7075",
+            evening: "#072E33",
+            midnight: "#05161A",
+        },
         container: {
             center: true,
             screens: {

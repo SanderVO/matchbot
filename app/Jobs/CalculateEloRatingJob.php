@@ -82,7 +82,7 @@ class CalculateEloRatingJob implements ShouldQueue
                     )
                     ->where(
                         'events.created_at',
-                        '<',
+                        '<=',
                         $this->event->created_at
                     )
                     ->when(
@@ -164,10 +164,15 @@ class CalculateEloRatingJob implements ShouldQueue
                                 ->pluck('user_id')
                                 ->toArray()
                         )
-                        ->groupByRaw('MAX(created_at)')
                         ->selectRaw('IF(SUM(elo_rating) = 0, 1500, (SUM(elo_rating)/ COUNT(id))) AS avg_elo_rating')
                         ->first()
                 )->avg_elo_rating ?? 1500;
+
+                dd(
+                    $opponentEloRating,
+                    $userEventData->toArray(),
+                    ($opponentEloRating + 400 * $userEventData->total_won_lost) / $userEventData->total_events
+                );
 
                 UserEloRating::updateOrCreate(
                     [

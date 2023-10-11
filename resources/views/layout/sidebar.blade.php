@@ -1,8 +1,9 @@
-<div class="w-60 h-full shadow-md bg-white px-1 absolute z-10 transition-transform ease-in-out duration-500 drop-shadow-lg"
-    :class="{'translate-x': sidebarVisible, '-translate-x-full': !sidebarVisible}">
+<div class="w-60 shadow-md bg-midnight px-1 absolute z-1 transition-transform ease-in-out duration-500 drop-shadow-lg m-auto h-full"
+    :class="{'translate-x': sidebarVisible, '-translate-x-full': !sidebarVisible}"
+    x-on:mousedown.outside.away="sidebarVisible = false">
     <ul class="relative">
         <li class="relative">
-            <a class="flex items-center text-sm py-4 px-6 h-12 overflow-hidden text-gray-700 text-ellipsis whitespace-nowrap rounded hover:text-gray-900 hover:bg-gray-100 transition duration-300 ease-in-out"
+            <a class="flex items-center text-sm py-4 px-6 h-12 overflow-hidden text-white text-ellipsis whitespace-nowrap rounded hover:text-white hover:bg-evening transition duration-300 ease-in-out"
                 href="/organizations" data-mdb-ripple="true" data-mdb-ripple-color="dark">
                 <svg aria-hidden="true" focusable="false" data-prefix="fas" class="w-3 h-3 mr-3" role="img"
                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -16,7 +17,7 @@
         </li>
 
         <li class="relative">
-            <a class="flex items-center text-sm py-4 px-6 h-12 overflow-hidden text-gray-700 text-ellipsis whitespace-nowrap rounded hover:text-gray-900 hover:bg-gray-100 transition duration-300 ease-in-out"
+            <a class="flex items-center text-sm py-4 px-6 h-12 overflow-hidden text-white text-ellipsis whitespace-nowrap rounded hover:text-white hover:bg-evening transition duration-300 ease-in-out"
                 href="/users" data-mdb-ripple="true" data-mdb-ripple-color="dark">
                 <svg aria-hidden="true" focusable="false" data-prefix="fas" class="w-3 h-3 mr-3" role="img"
                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -30,7 +31,7 @@
         </li>
 
         <li class="relative">
-            <a class="flex items-center text-sm py-4 px-6 h-12 overflow-hidden text-gray-700 text-ellipsis whitespace-nowrap rounded hover:text-gray-900 hover:bg-gray-100 transition duration-300 ease-in-out"
+            <a class="flex items-center text-sm py-4 px-6 h-12 overflow-hidden text-white text-ellipsis whitespace-nowrap rounded hover:text-white hover:bg-evening transition duration-300 ease-in-out"
                 href="/seasons" data-mdb-ripple="true" data-mdb-ripple-color="dark">
                 <svg aria-hidden="true" focusable="false" data-prefix="fas" class="w-3 h-3 mr-3" role="img"
                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512">
@@ -44,7 +45,7 @@
         </li>
 
         <li class="relative">
-            <a class="flex items-center text-sm py-4 px-6 h-12 overflow-hidden text-gray-700 text-ellipsis whitespace-nowrap rounded hover:text-gray-900 hover:bg-gray-100 transition duration-300 ease-in-out"
+            <a class="flex items-center text-sm py-4 px-6 h-12 overflow-hidden text-white text-ellipsis whitespace-nowrap rounded hover:text-white hover:bg-evening transition duration-300 ease-in-out"
                 href="/events" data-mdb-ripple="true" data-mdb-ripple-color="dark">
                 <svg aria-hidden="true" focusable="false" data-prefix="fas" class="w-3 h-3 mr-3" role="img"
                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512">
