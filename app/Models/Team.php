@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Team extends Model
@@ -46,15 +46,28 @@ class Team extends Model
     }
 
     /**
-     * Users relationship
+     * Team User relationship
      *
-     * @return HasManyThrough
+     * @return HasOne
      * 
      * @author Sander van Ooijen <sandervo+github@proton.me>
      * @version 1.0.0
      */
-    public function users(): HasManyThrough
+    public function teamUser(): HasOne
     {
-        return $this->hasManyThrough(User::class, 'team_user');
+        return $this->hasOne(TeamUser::class, 'team_id');
+    }
+
+    /**
+     * Team Users relationship
+     *
+     * @return HasMany
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
+     */
+    public function teamUsers(): HasMany
+    {
+        return $this->hasMany(TeamUser::class, 'team_id');
     }
 }

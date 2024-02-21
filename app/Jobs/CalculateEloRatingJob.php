@@ -5,8 +5,12 @@ namespace App\Jobs;
 use App\Models\Event;
 use App\Models\EventType;
 use App\Models\EventTypeSport;
+use App\Models\Team;
+use App\Models\TeamResult;
 use App\Models\TeamResultUser;
+use App\Models\User;
 use App\Models\UserEloRating;
+use App\Support\EloSupport;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -52,8 +56,7 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
     {
         DB::beginTransaction();
 
-        $eloRating = Config::get('elo.defaultRating');
-        $ratingIncrementer = Config::get('elo.incrementalScore');
+        $eloConfig = Config::get('elo');
 
         $userEventDataArray = collect([]);
 
@@ -63,98 +66,145 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
             'sport'
         ];
 
-        $teamResultUsers = TeamResultUser::query()
-            ->whereHas(
-                'teamResult',
-                function ($query) {
-                    $query
-                        ->where('event_id', $this->event->id);
-                }
-            )
+        $teamResults = TeamResult::query()
+            ->where('event_id', $this->event->id)
             ->with([
-                'user',
-                'teamResult' => function ($query) {
-                    $query
-                        ->where('event_id', $this->event->id);
-                }
+                'teamResultUsers.user'
             ])
             ->get();
 
-        $teamResultUsers->each(function (TeamResultUser $teamResultUser) use ($eventTypes, $eloRating, $ratingIncrementer, $userEventDataArray) {
+        $teamResults->each(function (TeamResult $teamResult) use ($eventTypes, $eloConfig, $userEventDataArray) {
             foreach ($eventTypes as $eventType) {
                 $objectableType = $eventType === 'type' ? EventType::class : ($eventType === 'sport' ? EventTypeSport::class : null);
                 $objectableId = $eventType === 'type' ? $this->event->eventType->id : ($eventType === 'sport' ? $this->event->eventType->sport->id : null);
 
-                $objectableTypeQuery = isset($objectableType) ? "= '{$objectableType}'" : "IS NULL";
-                $objectableIdQuery = isset($objectableId) ? "= '{$objectableId}'" : "IS NULL";
+                $opponentResult = TeamResult::query()
+                    ->where('event_id', $this->event->id)
+                    ->where('id', '!=', $teamResult->id)
+                    ->with([
+                        'teamResultUsers.user'
+                    ])
+                    ->first();
 
-                $totalEloRating = UserEloRating::query()
+                // Users ELO rating if available
+                $teamResult
+                    ->teamResultUsers
+                    ->each(function (TeamResultUser $teamResultUser) use (&$userEventDataArray, $eloConfig, $objectableType, $objectableId, $teamResult, $opponentResult) {
+                        $opponentEloRatings = collect([]);
+
+                        $userEloRating = optional(UserEloRating::query()
+                            ->where('objectable_type', $objectableType)
+                            ->where('objectable_id', $objectableId)
+                            ->where('scorable_type', User::class)
+                            ->where('scorable_id', $teamResultUser->user_id)
+                            ->whereHas(
+                                'event',
+                                function ($query) {
+                                    $query
+                                        ->where('start_date', '<=', $this->event->start_date);
+                                }
+                            )
+                            ->orderBy(
+                                Event::selectRaw('start_date')
+                                    ->whereColumn('user_elo_ratings.event_id', 'events.id'),
+                                'DESC'
+                            )
+                            ->first())
+                            ->elo_rating ?? $eloConfig['defaultRating'];
+
+                        $opponentResult
+                            ->teamResultUsers
+                            ->each(function (TeamResultUser $teamResultUser) use (&$opponentEloRatings, $eloConfig, $objectableType, $objectableId) {
+                                $opponentEloRatings->push(
+                                    optional(UserEloRating::query()
+                                        ->where('objectable_type', $objectableType)
+                                        ->where('objectable_id', $objectableId)
+                                        ->where('scorable_type', User::class)
+                                        ->where('scorable_id', '!=', $teamResultUser->user_id)
+                                        ->whereHas(
+                                            'event',
+                                            function ($query) {
+                                                $query
+                                                    ->where('start_date', '<=', $this->event->start_date);
+                                            }
+                                        )
+                                        ->orderBy(
+                                            Event::selectRaw('start_date')
+                                                ->whereColumn('user_elo_ratings.event_id', 'events.id'),
+                                            'DESC'
+                                        )
+                                        ->first())
+                                        ->elo_rating ?? $eloConfig['defaultRating']
+                                );
+                            });
+
+                        $newEloRating = EloSupport::calculateTeamUserEloRating(+$teamResult->score, +$opponentResult->score, +$userEloRating, $opponentEloRatings);
+
+                        $userEventData = [];
+
+                        $userEventData['elo_rating'] = $newEloRating;
+                        $userEventData['event_id'] = $teamResult->event_id;
+                        $userEventData['scorable_type'] = User::class;
+                        $userEventData['scorable_id'] = $teamResultUser->user_id;
+                        $userEventData['objectable_type'] = $objectableType;
+                        $userEventData['objectable_id'] = $objectableId;
+
+                        $userEventDataArray
+                            ->push($userEventData);
+                    });
+
+
+                // Team ELO rating
+                $lastEloRating = optional(UserEloRating::query()
+                    ->where('objectable_type', $objectableType)
+                    ->where('objectable_id', $objectableId)
+                    ->where('scorable_type', Team::class)
+                    ->where('scorable_id', $teamResult->team_id)
                     ->whereHas(
                         'event',
-                        function ($query) use ($teamResultUser) {
+                        function ($query) {
                             $query
-                                ->where('start_date', '<', $this->event->start_date)
-                                ->whereHas(
-                                    'teamResults.teamResultUsers',
-                                    function ($query) use ($teamResultUser) {
-                                        $query
-                                            ->where('user_id', $teamResultUser->user_id);
-                                    }
-                                );
+                                ->where('start_date', '<=', $this->event->start_date);
                         }
                     )
-                    ->where('user_id', '!=', $teamResultUser->user_id)
-                    ->whereRaw("objectable_type {$objectableTypeQuery}")
-                    ->whereRaw("objectable_id {$objectableIdQuery}")
-                    ->selectRaw("CONVERT(IFNULL(SUM(elo_rating), {$eloRating}), UNSIGNED) AS total")
-                    ->first()
-                    ->total ?? $eloRating;
+                    ->orderBy(
+                        Event::selectRaw('start_date')
+                            ->whereColumn('user_elo_ratings.event_id', 'events.id'),
+                        'DESC'
+                    )
+                    ->first())
+                    ->elo_rating ?? $eloConfig['defaultRating'];
 
-                $winAmount = Event::query()
-                    ->join(
-                        'team_results AS opponentTeam',
-                        function ($query) use ($teamResultUser) {
+                $opponentEloRating = optional(UserEloRating::query()
+                    ->where('objectable_type', $objectableType)
+                    ->where('objectable_id', $objectableId)
+                    ->where('scorable_type', Team::class)
+                    ->where('scorable_id', '!=', $teamResult->team_id)
+                    ->whereHas(
+                        'event',
+                        function ($query) {
                             $query
-                                ->on('opponentTeam.event_id', '=', 'events.id')
-                                ->where('opponentTeam.id', '!=', $teamResultUser->team_result_id);
+                                ->where('start_date', '<=', $this->event->start_date);
                         }
                     )
-                    ->where(
-                        'events.created_at',
-                        '<=',
-                        $this->event->created_at
+                    ->orderBy(
+                        Event::selectRaw('start_date')
+                            ->whereColumn('user_elo_ratings.event_id', 'events.id'),
+                        'DESC'
                     )
-                    ->whereRaw("
-                        opponentTeam.score < {$teamResultUser->teamResult->score}
-                    ")
-                    ->count();
+                    ->first())
+                    ->elo_rating ?? $eloConfig['defaultRating'];
 
-                $loseAmount = Event::query()
-                    ->join(
-                        'team_results AS opponentTeam',
-                        function ($query) use ($teamResultUser) {
-                            $query
-                                ->on('opponentTeam.event_id', '=', 'events.id')
-                                ->where('opponentTeam.id', '!=', $teamResultUser->team_result_id);
-                        }
-                    )
-                    ->where(
-                        'events.created_at',
-                        '<=',
-                        $this->event->created_at
-                    )
-                    ->whereRaw("
-                        opponentTeam.score > {$teamResultUser->teamResult->score}
-                    ")
-                    ->count();
+                $newEloRating = EloSupport::calculateTeamEloRating(+$teamResult->score, +$opponentResult->score, +$lastEloRating, +$opponentEloRating);
 
                 $userEventData = [];
 
-                $userEventData['elo_rating'] = ($totalEloRating + $ratingIncrementer * ($winAmount - $loseAmount)) / ($winAmount + $loseAmount);
-                $userEventData['user_id'] = $teamResultUser->user_id;
-                $userEventData['event_id'] = $teamResultUser->teamResult->event_id;
-                $userEventData['objectable_type'] = $eventType === 'type' ? EventType::class : ($eventType === 'sport' ? EventTypeSport::class : null);
-                $userEventData['objectable_id'] = $eventType === 'type' ? $this->event->eventType->id : ($eventType === 'sport' ? $this->event->eventType->sport->id : null);
+                $userEventData['elo_rating'] = $newEloRating;
+                $userEventData['event_id'] = $teamResult->event_id;
+                $userEventData['scorable_type'] = Team::class;
+                $userEventData['scorable_id'] = $teamResult->team_id;
+                $userEventData['objectable_type'] = $objectableType;
+                $userEventData['objectable_id'] = $objectableId;
 
                 $userEventDataArray
                     ->push($userEventData);
@@ -165,10 +215,11 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
             ->each(function ($userEventData) {
                 UserEloRating::updateOrCreate(
                     [
-                        'user_id' => $userEventData['user_id'],
                         'event_id' => $userEventData['event_id'],
                         'objectable_type' => $userEventData['objectable_type'],
-                        'objectable_id' => $userEventData['objectable_id']
+                        'objectable_id' => $userEventData['objectable_id'],
+                        'scorable_type' => $userEventData['scorable_type'],
+                        'scorable_id' => $userEventData['scorable_id']
                     ],
                     [
                         'elo_rating' => $userEventData['elo_rating']

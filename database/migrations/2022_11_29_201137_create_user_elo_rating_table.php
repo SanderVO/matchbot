@@ -18,14 +18,10 @@ return new class extends Migration
             $table->integer('elo_rating');
             $table->string('objectable_type')->nullable();
             $table->unsignedBigInteger('objectable_id')->nullable();
-            $table->unsignedBigInteger('user_id');
+            $table->string('scorable_type');
+            $table->unsignedBigInteger('scorable_id');
             $table->unsignedBigInteger('event_id');
             $table->timestamps();
-
-            $table
-                ->foreign('user_id')
-                ->references('id')
-                ->on('users');
 
             $table
                 ->foreign('event_id')

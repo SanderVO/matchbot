@@ -11,6 +11,7 @@ use App\Models\TeamResultUser;
 use App\Models\TeamUser;
 use App\Models\User;
 use App\Models\UserEloRating;
+use App\Support\EloSupport;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
@@ -19,15 +20,15 @@ use Tests\TestCase;
 class CreateEloRatingJobTest extends TestCase
 {
     /**
-     * Can calculate general elo rating for two players
+     * Can calculate general elo rating for two teams and players without score
      * 
      * @author Sander van Ooijen <sandervo+github@proton.me>
      * @version 1.0.0
      */
-    public function testCanCalculateGeneralEloRatingForTwoPlayersWithoutScore(): void
+    public function testCanCalculateGeneralEloRatingForTwoTeamsAndPlayersWithoutScore(): void
     {
         // Arrange
-        $eloRatingScores = Config::get('elo');
+        $eloConfig = Config::get('elo');
 
         $season = Season::factory()
             ->create();
@@ -48,7 +49,7 @@ class CreateEloRatingJobTest extends TestCase
         $team = Team::factory()
             ->create();
 
-        $oponentTeam = Team::factory()
+        $opponentTeam = Team::factory()
             ->create();
 
         TeamUser::factory()
@@ -60,7 +61,7 @@ class CreateEloRatingJobTest extends TestCase
         TeamUser::factory()
             ->create([
                 'user_id' => $opponent->id,
-                'team_id' => $oponentTeam->id
+                'team_id' => $opponentTeam->id
             ]);
 
         $teamResult = TeamResult::factory()
@@ -73,7 +74,7 @@ class CreateEloRatingJobTest extends TestCase
         $opponentTeamResult = TeamResult::factory()
             ->create([
                 'score' => 5,
-                'team_id' => $oponentTeam->id,
+                'team_id' => $opponentTeam->id,
                 'event_id' => $event->id
             ]);
 
@@ -98,31 +99,36 @@ class CreateEloRatingJobTest extends TestCase
         // Assert
         $eloRatings = UserEloRating::get();
 
+        $newTeamOwnEloRating = EloSupport::calculateTeamEloRating(+$teamResult->score, +$opponentTeamResult->score, +$eloConfig['defaultRating'], +$eloConfig['defaultRating']);
+        $opponentTeamOwnEloRating = EloSupport::calculateTeamEloRating(+$opponentTeamResult->score, +$teamResult->score, +$eloConfig['defaultRating'], +$eloConfig['defaultRating']);
+
         $this->assertEquals(
             $eloRatings
-                ->where('user_id', $user->id)
                 ->where('event_id', $event->id)
                 ->whereNull('objectable_type')
                 ->whereNull('objectable_id')
+                ->where('scorable_type', Team::class)
+                ->where('scorable_id', $team->id)
                 ->first()
                 ->elo_rating,
-            ($eloRatingScores['defaultRating'] + 400) / 1
+            $newTeamOwnEloRating
         );
 
         $this->assertEquals(
             $eloRatings
-                ->where('user_id', $opponent->id)
                 ->where('event_id', $event->id)
                 ->whereNull('objectable_type')
                 ->whereNull('objectable_id')
+                ->where('scorable_type', Team::class)
+                ->where('scorable_id', $opponentTeam->id)
                 ->first()
                 ->elo_rating,
-            ($eloRatingScores['defaultRating'] - 400) / 1
+            $opponentTeamOwnEloRating
         );
     }
 
     /**
-     * Can calculate general elo rating for two players with 2 wins and 1 loss
+     * Can calculate general elo rating for two teams and players with 2 wins and 1 loss
      * 
      * @author Sander van Ooijen <sandervo+github@proton.me>
      * @version 1.0.0
@@ -144,7 +150,7 @@ class CreateEloRatingJobTest extends TestCase
         $team = Team::factory()
             ->create();
 
-        $oponentTeam = Team::factory()
+        $opponentTeam = Team::factory()
             ->create();
 
         for ($index = $limit; $index > 0; $index--) {
@@ -164,7 +170,7 @@ class CreateEloRatingJobTest extends TestCase
             TeamUser::factory()
                 ->create([
                     'user_id' => $opponent->id,
-                    'team_id' => $oponentTeam->id
+                    'team_id' => $opponentTeam->id
                 ]);
 
             $teamResult = TeamResult::factory()
@@ -177,7 +183,7 @@ class CreateEloRatingJobTest extends TestCase
             $opponentTeamResult = TeamResult::factory()
                 ->create([
                     'score' => $index === 1 ? 10 : 5,
-                    'team_id' => $oponentTeam->id,
+                    'team_id' => $opponentTeam->id,
                     'event_id' => $event->id
                 ]);
 
@@ -201,50 +207,129 @@ class CreateEloRatingJobTest extends TestCase
         }
 
         // Assert
-        $eloRatings = UserEloRating::query()
+        $lastEvent = Event::query()
             ->with([
-                'event'
+                'teamResults'
             ])
-            ->get();
+            ->orderByDesc('start_date')
+            ->first();
 
-        $eloRatingQuery = $eloRatings
+        $ownScore = $lastEvent
+            ->teamResults
+            ->where('team_id', $team->id)
+            ->first()
+            ->score;
+
+        $opponentScore = $lastEvent
+            ->teamResults
+            ->where('team_id', $opponentTeam->id)
+            ->first()
+            ->score;
+
+        $ownEloRating = UserEloRating::query()
             ->whereNull('objectable_type')
-            ->whereNull('objectable_id');
+            ->whereNull('objectable_id')
+            ->where('scorable_type', Team::class)
+            ->where('scorable_id', $team->id)
+            ->orderBy(
+                Event::selectRaw('start_date')
+                    ->whereColumn('user_elo_ratings.event_id', 'events.id'),
+                'DESC'
+            )
+            ->first()
+            ->elo_rating;
 
-        $ownTotalElo = $eloRatingQuery
-            ->where('user_id', $user->id)
-            ->sum('elo_rating');
+        $ownUserEloRating = UserEloRating::query()
+            ->whereNull('objectable_type')
+            ->whereNull('objectable_id')
+            ->where('scorable_type', User::class)
+            ->where('scorable_id', $user->id)
+            ->orderBy(
+                Event::selectRaw('start_date')
+                    ->whereColumn('user_elo_ratings.event_id', 'events.id'),
+                'DESC'
+            )
+            ->first()
+            ->elo_rating;
 
-        $opponentTotalElo = $eloRatingQuery
-            ->where('user_id', $opponent->id)
-            ->sum('elo_rating');
+        $ownOldEloRating = UserEloRating::query()
+            ->whereNull('objectable_type')
+            ->whereNull('objectable_id')
+            ->where('scorable_type', Team::class)
+            ->where('scorable_id', $team->id)
+            ->orderBy(
+                Event::selectRaw('start_date')
+                    ->whereColumn('user_elo_ratings.event_id', 'events.id'),
+                'DESC'
+            )
+            ->skip(1)
+            ->first()
+            ->elo_rating;
+
+        $opponentEloRating = UserEloRating::query()
+            ->whereNull('objectable_type')
+            ->whereNull('objectable_id')
+            ->where('scorable_type', Team::class)
+            ->where('scorable_id', $opponentTeam->id)
+            ->orderBy(
+                Event::selectRaw('start_date')
+                    ->whereColumn('user_elo_ratings.event_id', 'events.id'),
+                'DESC'
+            )
+            ->first()
+            ->elo_rating;
+
+        $opponentUserEloRating = UserEloRating::query()
+            ->whereNull('objectable_type')
+            ->whereNull('objectable_id')
+            ->where('scorable_type', User::class)
+            ->where('scorable_id', $opponent->id)
+            ->orderBy(
+                Event::selectRaw('start_date')
+                    ->whereColumn('user_elo_ratings.event_id', 'events.id'),
+                'DESC'
+            )
+            ->first()
+            ->elo_rating;
+
+        $opponentOldEloRating = UserEloRating::query()
+            ->whereNull('objectable_type')
+            ->whereNull('objectable_id')
+            ->where('scorable_type', Team::class)
+            ->where('scorable_id', $opponentTeam->id)
+            ->orderBy(
+                Event::selectRaw('start_date')
+                    ->whereColumn('user_elo_ratings.event_id', 'events.id'),
+                'DESC'
+            )
+            ->skip(1)
+            ->first()
+            ->elo_rating;
+
+        $newOwnEloRating = EloSupport::calculateTeamEloRating(+$ownScore, +$opponentScore, +$ownOldEloRating, +$opponentOldEloRating);
+        $newOpponentEloRating = EloSupport::calculateTeamEloRating(+$opponentScore, +$ownScore, +$opponentOldEloRating, +$ownOldEloRating);
+
+        $newOwnUserEloRating = EloSupport::calculateTeamUserEloRating(+$ownScore, +$opponentScore, +$ownOldEloRating, collect([+$opponentOldEloRating]));
+        $newOpponentUserEloRating = EloSupport::calculateTeamUserEloRating(+$opponentScore, +$ownScore, +$opponentOldEloRating, collect([+$ownOldEloRating]));
 
         $this->assertEquals(
-            $eloRatingQuery
-                ->where('user_id', $user->id)
-                ->sortBy(
-                    function ($data) {
-                        return Carbon::parse($data->event->start_date)->toTimeString();
-                    },
-                    true
-                )
-                ->first()
-                ->elo_rating,
-            ($ownTotalElo + 400 * (2 - 1)) / $limit
+            $ownEloRating,
+            $newOwnEloRating
         );
 
         $this->assertEquals(
-            $eloRatingQuery
-                ->where('user_id', $opponent->id)
-                ->sortBy(
-                    function ($data) {
-                        return Carbon::parse($data->event->start_date)->toTimeString();
-                    },
-                    true
-                )
-                ->first()
-                ->elo_rating,
-            ($opponentTotalElo + 400 * (1 - 2)) / $limit
+            $opponentEloRating,
+            $newOpponentEloRating
+        );
+
+        $this->assertEquals(
+            $ownUserEloRating,
+            $newOwnUserEloRating
+        );
+
+        $this->assertEquals(
+            $opponentUserEloRating,
+            $newOpponentUserEloRating
         );
     }
 }
