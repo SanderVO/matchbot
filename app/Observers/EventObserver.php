@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Jobs\CalculateEloRatingJob;
 use App\Models\Event;
+use Illuminate\Database\Eloquent\Collection;
 
 class EventObserver
 {
@@ -17,6 +18,17 @@ class EventObserver
      */
     public function saved(Event $event)
     {
-        CalculateEloRatingJob::dispatch($event->id);
+        if ($event->status === 1) {
+            Event::query()
+                ->where('status', 1)
+                ->where('start_date', '>=', $event->start_date)
+                ->orderBy('start_date')
+                ->chunk(500, function (Collection $events) {
+                    $events
+                        ->each(function (Event $event) {
+                            CalculateEloRatingJob::dispatch($event->id);
+                        });
+                });
+        }
     }
 }

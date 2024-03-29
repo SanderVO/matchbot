@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('user_elo_ratings', function (Blueprint $table) {
             $table->id();
             $table->integer('elo_rating');
+            $table->integer('elo_rating_difference');
             $table->string('objectable_type')->nullable();
             $table->unsignedBigInteger('objectable_id')->nullable();
             $table->string('scorable_type');

@@ -1,6 +1,6 @@
-<div class="w-60 shadow-md bg-midnight px-1 absolute z-1 transition-transform ease-in-out duration-500 drop-shadow-lg m-auto h-full"
+<div class="w-60 shadow-md bg-slate-950 px-1 absolute z-1 transition-transform ease-in-out duration-500 drop-shadow-lg m-auto h-full"
     :class="{'translate-x': sidebarVisible, '-translate-x-full': !sidebarVisible}"
-    x-on:mousedown.outside.away="sidebarVisible = false">
+    x-on:mousedown.outside.away="sidebarVisible = false" x-cloak>
     <ul class="relative">
         <li class="relative">
             <a class="flex items-center text-sm py-4 px-6 h-12 overflow-hidden text-white text-ellipsis whitespace-nowrap rounded hover:text-white hover:bg-evening transition duration-300 ease-in-out"

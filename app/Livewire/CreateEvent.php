@@ -4,30 +4,16 @@ namespace App\Livewire;
 
 use App\Models\Event;
 use Livewire\Component;
+use Livewire\Attributes\Rule;
 
 class CreateEvent extends Component
 {
     public Event $event;
 
-    protected $rules = [
-        'event.name' => [
-            'required',
-            'string'
-        ],
-    ];
+    #[Rule('required|string')]
+    public string $name = '';
 
     public bool $saveIsSuccessful = false;
-
-    /**
-     * On component mount
-     * 
-     * @author Sander van Ooijen <sandervo+github@proton.me>
-     * @version 1.0.0
-     */
-    public function mount()
-    {
-        $this->event = new Event();
-    }
 
     /**
      * Save event action
@@ -39,11 +25,16 @@ class CreateEvent extends Component
     {
         $this->validate();
 
-        $this->event->save();
+        Event::create(
+            $this->only(['name'])
+        );
 
         $this->saveIsSuccessful = true;
 
-        $this->dispatch('refreshEvents')->to('event-table');
+        $this->dispatch('refreshEvents')
+            ->to('event-table');
+
+        $this->dispatch('event-created');
     }
 
     /**

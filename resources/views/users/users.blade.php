@@ -2,12 +2,10 @@
 
 @section('content')
 
-<div class="flex flex-row justify-between items-center mt-8 mb-4">
-    <h1 class="h1">{{ $name }}</h1>
-
+<div class="flex flex-row justify-end items-center mt-8 mb-4">
     <button type="button" class="px-6
       py-2.5
-      bg-day
+      bg-slate-900
       text-white
       font-medium
       text-xs
@@ -15,9 +13,9 @@
       uppercase
       rounded
       shadow-md
-      hover:bg-evening hover:shadow-lg
-      focus:bg-evening focus:shadow-lg focus:outline-none focus:ring-0
-      active:bg-evening active:shadow-lg
+      hover:bg-slate-700 hover:shadow-lg
+      focus:bg-slate-700 focus:shadow-lg focus:outline-none focus:ring-0
+      active:bg-slate-700 active:shadow-lg
       transition
       duration-150
       ease-in-out" @click="createUserModalVisible = true">

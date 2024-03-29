@@ -1,6 +1,6 @@
-<div>
-    <table class="table-auto w-full mb-4">
-        <thead class="bg-evening">
+<div class="border-slate-800 rounded-md">
+    <table class="table-auto w-full mb-4 bg-slate-900 border-slate-800 border-4 rounded-lg">
+        <thead class="border-b-4 border-slate-800">
             <tr>
                 <th class="text-left p-4">
                     ID
@@ -11,11 +11,11 @@
                 </th>
 
                 <th class="text-left p-4">
-                    Deelnemers
+                    Players
                 </th>
 
                 <th class="text-left p-4">
-                    Aangemaakt op
+                    Created at
                 </th>
             </tr>
         </thead>

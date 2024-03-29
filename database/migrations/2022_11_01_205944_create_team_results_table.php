@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->integer('score')->nullable();
             $table->integer('crawl_score')->nullable();
-            $table->string('comment')->nullable();
+            $table->text('comment')->nullable();
             $table->unsignedBigInteger('team_id');
             $table->unsignedBigInteger('event_id');
             $table->timestamps();

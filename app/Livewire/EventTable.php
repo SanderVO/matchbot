@@ -24,10 +24,11 @@ class EventTable extends Component
     public function loadEvents()
     {
         $this->events = Event::query()
+            ->has('teamResults')
             ->with([
                 'season',
-                'eventType',
-                'teams.users'
+                'eventType.sport',
+                'teamResults.team.users'
             ])
             ->orderBy(
                 'created_at',

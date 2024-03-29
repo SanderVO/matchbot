@@ -18,6 +18,7 @@ class UserEloRating extends Model
      */
     protected $fillable = [
         'elo_rating',
+        'elo_rating_difference',
         'objectable_type',
         'objectable_id',
         'scorable_type',

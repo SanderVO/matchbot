@@ -19,6 +19,7 @@ class Event extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'comment',
         'status',
         'start_date',
         'end_date',
@@ -73,18 +74,5 @@ class Event extends Model
     public function teamResults(): HasMany
     {
         return $this->hasMany(TeamResult::class, 'event_id');
-    }
-
-    /**
-     * Team results relationship
-     *
-     * @return HasMany
-     * 
-     * @author Sander van Ooijen <sandervo+github@proton.me>
-     * @version 1.0.0
-     */
-    public function teams(): HasMany
-    {
-        return $this->hasMany(Team::class, 'event_id');
     }
 }

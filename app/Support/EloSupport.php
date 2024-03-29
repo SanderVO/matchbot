@@ -24,7 +24,7 @@ class EloSupport
         $eloConfig = Config::get('elo');
 
         $actualScore = +$opponentScore === +$ownScore ? $eloConfig['draw'] : (+$opponentScore > +$ownScore ? $eloConfig['lose'] : $eloConfig['win']);
-        $expectedScore = 1 / (1 + 10 ^ ((+$opponentEloRating - +$ownEloRating) / $eloConfig['incrementalScore']));
+        $expectedScore = self::calculateExpectedScore($opponentEloRating, $ownEloRating);
 
         return round(+$ownEloRating + $eloConfig['kFactor'] * (+$actualScore - +$expectedScore), 0);
     }
@@ -50,12 +50,32 @@ class EloSupport
         $expectedScore = 0;
 
         $opponentEloRatings
-            ->each(function (int $opponentEloRating) use (&$expectedScore, $ownEloRating, $eloConfig) {
-                $expectedScore += 1 / (1 + 10 ^ ((+$opponentEloRating - +$ownEloRating) / $eloConfig['incrementalScore']));
+            ->each(function (int $opponentEloRating) use (&$expectedScore, $ownEloRating) {
+                $expectedScore += self::calculateExpectedScore($opponentEloRating, $ownEloRating);
             });
 
         $expectedScore = $expectedScore / $opponentEloRatings->count();
 
         return round(+$ownEloRating + $eloConfig['kFactor'] * (+$actualScore - +$expectedScore), 0);
+    }
+
+    /**
+     * Calculate the expected score
+     *
+     * @param int $opponentEloRating
+     * @param int $ownEloRating
+     * 
+     * @return float
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
+     */
+    public static function calculateExpectedScore($opponentEloRating, $ownEloRating): float
+    {
+        $eloConfig = Config::get('elo');
+
+        $rating = 1 + pow(10, (((+$opponentEloRating - +$ownEloRating) !== 0 ? (+$opponentEloRating - +$ownEloRating) : 1) / $eloConfig['incrementalScore']));
+
+        return 1 / ($rating === 0 ? 1 : $rating);
     }
 }
