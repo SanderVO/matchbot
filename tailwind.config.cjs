@@ -199,7 +199,10 @@ module.exports = {
             "6xl": "72rem",
             "7xl": "80rem",
         },
-        container: {},
+        container: {
+            center: true,
+            padding: "2rem",
+        },
         content: {
             none: "none",
         },

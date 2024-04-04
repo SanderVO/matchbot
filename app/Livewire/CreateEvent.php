@@ -3,17 +3,80 @@
 namespace App\Livewire;
 
 use App\Models\Event;
+use App\Models\EventType;
+use App\Models\EventTypeSport;
+use App\Models\Organization;
+use App\Models\Season;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
-use Livewire\Attributes\Rule;
 
 class CreateEvent extends Component
 {
-    public Event $event;
+    public Collection $seasons;
+    public Collection $sports;
+    public Collection $types;
+    public Collection $users;
 
-    #[Rule('required|string')]
-    public string $name = '';
+    public $seasonId = null;
+    public $sportId = null;
+    public $eventTypeId = null;
+    public $userIds = [];
 
     public bool $saveIsSuccessful = false;
+
+    protected $listeners = ['userAdded', 'userRemoved'];
+
+    /**
+     * On mount
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
+     */
+    public function mount()
+    {
+        $this->sports = EventTypeSport::query()
+            ->orderBy('name')
+            ->get();
+
+        $this->seasons = Season::query()
+            ->orderBy('name')
+            ->get();
+
+        $this->users = User::query()
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Rules for form
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
+     */
+    public function rules()
+    {
+        return [
+            'seasonId' => [
+                'required',
+                Rule::exists(Season::class, 'id')
+            ],
+            'sportId' => [
+                'required',
+                Rule::exists(EventTypeSport::class, 'id')
+            ],
+            'eventTypeId' => [
+                'required',
+                Rule::exists(EventType::class, 'id')
+            ],
+            'userIds' => [
+                'required',
+                'array',
+                'min:2'
+            ],
+        ];
+    }
 
     /**
      * Save event action
@@ -26,15 +89,49 @@ class CreateEvent extends Component
         $this->validate();
 
         Event::create(
-            $this->only(['name'])
+            [
+                'status' => 0,
+                'event_type_id' => $this->eventTypeId,
+                'season_id' => $this->seasonId
+            ]
         );
 
         $this->saveIsSuccessful = true;
+    }
 
-        $this->dispatch('refreshEvents')
-            ->to('event-table');
+    /**
+     * Get event types based on chosen sport
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
+     */
+    public function getEventTypes(): void
+    {
+        $this->types = EventType::query()
+            ->where('event_type_sport_id', $this->sportId)
+            ->get();
+    }
 
-        $this->dispatch('event-created');
+    /**
+     * Add user
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
+     */
+    public function userAdded(int $userId)
+    {
+        $this->userIds[] = $userId;
+    }
+
+    /**
+     * Remove user
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
+     */
+    public function userRemoved(int $userId)
+    {
+        $this->userIds = array_diff($this->userIds, [$userId]);
     }
 
     /**

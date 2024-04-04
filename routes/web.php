@@ -28,7 +28,8 @@ Route::resource('users', UserController::class)
 
 Route::resource('events', EventController::class)
     ->only([
-        'index'
+        'index',
+        'create'
     ]);
 
 Route::resource('organizations', OrganizationController::class)

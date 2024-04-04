@@ -45,4 +45,26 @@ class EventController extends Controller
             ]
         );
     }
+
+    /**
+     * Create a new resource.
+     *
+     * @param Event $event
+     * 
+     * @return FacadeView
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
+     */
+    public function create(): FacadeView
+    {
+        $event = new Event();
+
+        return View::make(
+            'events.create',
+            [
+                'event' => $event
+            ]
+        );
+    }
 }
