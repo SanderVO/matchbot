@@ -1,4 +1,4 @@
-<form class="flex flex-col bg-slate-600 rounded p-4" wire:submit="save">
+<form class="flex flex-col bg-slate-800 border border-slate-600 rounded p-4" wire:submit="save">
     <div class="mb-4 w-64">
         <label class="block" for="season">
             <span>Season</span>
@@ -81,13 +81,13 @@
 
     <div class="my-4">
         <button
-            class="bg-slate-800 transition-colors w-100 py-2 px-4 color-white rounded text-white w-full hover:bg-slate-700"
+            class="bg-slate-900 border border-slate-700 transition-colors w-100 py-2 px-4 color-white rounded text-white w-full hover:bg-slate-700"
             type="submit" wire:loading.attr="disabled">
             <span wire:loading.remove>
                 Generate
             </span>
 
-            <span wire:loading>
+            <span wire:loading wire:target="save">
                 Generating...
             </span>
         </button>

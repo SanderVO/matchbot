@@ -18,9 +18,9 @@
     </div>
 
     @if (count($selectedUsers) > 0)
-    <div class=" mt-2 flex flex-row w-full">
+    <div class=" my-2 flex flex-col w-full">
                     @foreach ($selectedUsers as $selectedUser)
-                    <div class="rounded-lg p-2 bg-purple-500 text-white border border-purple-400 flex flex-row align-items-center w-fit mr-2 cursor-pointer"
+                    <div class="rounded-lg p-2 bg-sky-900 text-white border border-sky-700 flex flex-row align-items-center w-fit mr-2 cursor-pointer"
                         wire:click="removeUser({{ $selectedUser->id }})">
                         <div class=" mr-4">
                             {{ $selectedUser->name }}

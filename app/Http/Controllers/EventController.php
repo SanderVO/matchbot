@@ -38,6 +38,19 @@ class EventController extends Controller
      */
     public function show(Event $event): FacadeView
     {
+        $event
+            ->loadMissing([
+                'season',
+                'eventType',
+                'teamResults' => function ($query) {
+                    $query
+                        ->with([
+                            'team.users',
+                            'teamResultUsers.user'
+                        ]);
+                }
+            ]);
+
         return View::make(
             'events.event',
             [

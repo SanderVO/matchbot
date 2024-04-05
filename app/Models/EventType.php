@@ -18,6 +18,10 @@ class EventType extends Model
      */
     protected $fillable = [
         'name',
+        'min_players',
+        'max_players',
+        'min_teams',
+        'max_teams',
         'event_type_sport_id'
     ];
 

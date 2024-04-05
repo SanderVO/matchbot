@@ -16,6 +16,10 @@ return new class extends Migration
         Schema::create('event_types', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->unsignedInteger('min_players');
+            $table->unsignedInteger('max_players')->nullable();
+            $table->unsignedInteger('min_teams');
+            $table->unsignedInteger('max_teams')->nullable();
             $table->unsignedBigInteger('event_type_sport_id');
             $table->timestamps();
 
