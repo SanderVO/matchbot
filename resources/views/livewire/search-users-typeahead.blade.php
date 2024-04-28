@@ -1,5 +1,5 @@
 <label class="block" for="type">
-    <span>Users</span>
+    <span>Players</span>
 
     <div class="relative">
         <input class="text-black w-full" wire:model.live="searchTerm" wire:keydown.debounce.300ms="loadUsers()">
@@ -19,6 +19,7 @@
 
     @if (count($selectedUsers) > 0)
     <div class=" my-2 flex flex-col w-full">
+                    <span>Potential players</span>
                     @foreach ($selectedUsers as $selectedUser)
                     <div class="rounded-lg p-2 bg-sky-900 text-white border border-sky-700 flex flex-row align-items-center w-fit mr-2 cursor-pointer"
                         wire:click="removeUser({{ $selectedUser->id }})">

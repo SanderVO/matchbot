@@ -51,6 +51,7 @@ class CreateEvent extends Component
             ->get();
 
         $this->users = User::query()
+            ->where('status', 1)
             ->orderBy('name')
             ->get();
     }
@@ -82,12 +83,17 @@ class CreateEvent extends Component
                 function (string $attribute, mixed $value, Closure $fail) {
                     $eventType = EventType::find($this->eventTypeId);
 
+                    if (!isset($eventType)) {
+                        $fail("No event type selected");
+                        return;
+                    }
+
                     if (
                         $eventType->min_players > count($value) ||
-                        count($value) % $eventType->min_teams !== 0 ||
+                        (count($value) % $eventType->min_teams !== 0 && $eventType->min_teams !== $eventType->min_teams) ||
                         (isset($eventType->max_players) && $eventType->max_players < count($value))
                     ) {
-                        $fail("Ongeldig aantal spelers geselecteerd");
+                        $fail("Incorrect amount of players selected");
                     }
                 },
             ],
@@ -119,13 +125,24 @@ class CreateEvent extends Component
 
         $userIds = $this->userIds;
 
-        $teamAmount = count($this->userIds) / $eventType->min_teams;
+        if ($eventType->min_teams === $eventType->max_teams) {
+            $teamAmount = $eventType->min_teams;
+            $userTeamAmount = $eventType->min_players / $teamAmount;
+        } else {
+            $teamAmount = count($this->userIds) / $eventType->min_teams;
+            $userTeamAmount = count($this->userIds) / $teamAmount;
+        }
 
         for ($counter = 0; $counter < $teamAmount; $counter++) {
             if (count($userIds) > $teamAmount) {
-                $teamIds = array_intersect_key($userIds, array_rand($userIds, $teamAmount));
+                $teamIds = [];
 
-                $userIds = array_diff($userIds, $teamIds);
+                for ($keyCounter = 0; $keyCounter < $userTeamAmount; $keyCounter++) {
+                    $randomKey = $this->getRandomKey($userIds);
+                    $teamIds[] = $userIds[$randomKey];
+                    unset($userIds[$randomKey]);
+                    $userIds = array_values($userIds);
+                }
             } else {
                 $teamIds = $userIds;
             }
@@ -211,6 +228,21 @@ class CreateEvent extends Component
     public function userRemoved(int $userId)
     {
         $this->userIds = array_diff($this->userIds, [$userId]);
+    }
+
+    /**
+     * Get a random key from array and return key
+     *
+     * @param array $userIds
+     * 
+     * @return int
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
+     */
+    private function getRandomKey(array $userIds): int
+    {
+        return mt_rand(0, count($userIds) - 1);
     }
 
     /**

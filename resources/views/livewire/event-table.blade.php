@@ -33,6 +33,9 @@
                 <th class="text-left p-4">
                     Created at
                 </th>
+
+                <th class="text-left p-4">
+                </th>
             </tr>
         </thead>
 
@@ -44,7 +47,9 @@
                 </td>
 
                 <td class="text-left p-4">
-                    {{ $event->teamResults[0]->team->name }} - {{ $event->teamResults[1]->team->name }}
+                    <a href="/events/{{ $event->id }}">
+                        {{ $event->teamResults[0]->team->name }} - {{ $event->teamResults[1]->team->name }}
+                    </a>
                 </td>
 
                 <td class="text-left p-4">
@@ -69,6 +74,12 @@
 
                 <td class="text-left p-4">
                     {{ $event->created_at->format('d-m-Y, H:i') }}
+                </td>
+
+                <td>
+                    <button
+                        class="p-2 border rounded border-red-500 bg-red-600 hover:bg-red-500 transition-bg duration-300 ease-in-out"
+                        wire:click='destroyEvent({{ $event->id }})'>X</button>
                 </td>
             </tr>
             @empty

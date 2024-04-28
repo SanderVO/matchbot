@@ -1,4 +1,4 @@
-<form class="flex flex-col bg-slate-800 border border-slate-600 rounded p-4" wire:submit="save">
+<form class="flex flex-col bg-slate-800 border border-slate-600 rounded p-4 w-max m-auto" wire:submit="save">
     <div class="mb-4 w-64">
         <label class="block" for="season">
             <span>Season</span>
@@ -49,7 +49,7 @@
         <label class="block" for="type">
             <span>Type</span>
 
-            <select class="form-select block px-2 py-2 rounded-md w-full text-black"" name=" type"
+            <select class="form-select block px-2 py-2 rounded-md w-full text-black" name="type"
                 wire:model.live="eventTypeId">
                 <option checked="true">Choose a type</option>
 
@@ -70,13 +70,22 @@
     @endif
 
     <div class="mb-4 w-64">
-        <livewire:search-users-typeahead organizationId="1" />
+        <label class="block" for="users">
+            <span>Players</span>
 
-        @error('userIds')
-        <div class="bg-red-600 w-100 p-4 mt-4 color-white rounded text-white">
-            {{ $message }}
-        </div>
-        @enderror
+            <select class="form-select block px-2 py-2 rounded-md w-full text-black" name="users" id="users" multiple
+                wire:model="userIds">
+                @foreach ($users as $user)
+                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                @endforeach
+            </select>
+
+            @error('userIds')
+            <div class="bg-red-600 w-100 p-4 mt-4 color-white rounded text-white">
+                {{ $message }}
+            </div>
+            @enderror
+        </label>
     </div>
 
     <div class="my-4">

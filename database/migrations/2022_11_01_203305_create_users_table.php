@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->tinyInteger('status')->default(1);
             $table->string('authorization_type')->nullable();
             $table->string('authorization_token')->nullable();
             $table->string('authorization_user_id')->nullable();

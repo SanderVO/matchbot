@@ -37,6 +37,13 @@ class EventTable extends Component
             ->paginate();
     }
 
+    public function destroyEvent(int $eventId)
+    {
+        Event::destroy($eventId);
+
+        $this->loadEvents();
+    }
+
     public function render()
     {
         return view(

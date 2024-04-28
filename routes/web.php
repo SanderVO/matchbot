@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\SeasonController;
 use App\Http\Controllers\UserController;
@@ -39,6 +40,11 @@ Route::resource('organizations', OrganizationController::class)
     ]);
 
 Route::resource('seasons', SeasonController::class)
+    ->only([
+        'index'
+    ]);
+
+Route::resource('leaderboard', LeaderboardController::class)
     ->only([
         'index'
     ]);
