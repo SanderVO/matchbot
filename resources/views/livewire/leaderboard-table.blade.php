@@ -11,6 +11,14 @@
                 </th>
 
                 <th class="text-left p-4">
+                    W/L
+                </th>
+
+                <th class="text-left p-4">
+                    W/L %
+                </th>
+
+                <th class="text-left p-4">
                     ELO Rating
                 </th>
 
@@ -32,6 +40,16 @@
                 </td>
 
                 <td class="text-left p-4">
+                    <span class="text-green-400">W{{ $userEloRating->wins }}</span> - <span class="text-red-400">L{{
+                        $userEloRating->losses }}</span>
+                </td>
+
+                <td class="text-left p-4">
+                    <span class="{{ $userEloRating->win_lose_percentage > 49 ? 'text-green-400' : 'text-red-400' }}">{{
+                        $userEloRating->win_lose_percentage }}%</span>
+                </td>
+
+                <td class="text-left p-4 font-bold">
                     {{ $userEloRating->elo_rating }}
                 </td>
 

@@ -2,7 +2,9 @@
 
 namespace App\Livewire;
 
+use App\Models\Event;
 use App\Models\Team;
+use App\Models\TeamResult;
 use App\Models\User;
 use App\Models\UserEloRating;
 use Livewire\Component;
@@ -35,7 +37,7 @@ class LeaderboardTable extends Component
      */
     public function loadLeaderboard()
     {
-        $this->userEloRatings =  UserEloRating::query()
+        $userEloRatings =  UserEloRating::query()
             ->whereNull('objectable_type')
             ->whereNull('objectable_id')
             ->where('scorable_type', Team::class)
@@ -71,11 +73,56 @@ class LeaderboardTable extends Component
                 }
             )
             ->with([
-                'scorable'
+                'scorable',
+                'event.teamResults'
             ])
             ->orderBy('elo_rating', 'DESC')
             ->paginate()
             ->setPath(route('leaderboard.index'));
+
+        $userEloRatings->through(function (UserEloRating $userEloRating) {
+            $userEloRating->wins = 0;
+            $userEloRating->losses = 0;
+
+            Event::query()
+                ->where('status', 1)
+                ->whereHas(
+                    'teamResults',
+                    function ($query) use ($userEloRating) {
+                        $query
+                            ->where('team_id', $userEloRating->scorable_id);
+                    }
+                )
+                ->with([
+                    'teamResults'
+                ])
+                ->get()
+                ->each(function (Event $event) use (&$userEloRating) {
+                    $teamScore = $event
+                        ->teamResults
+                        ->where('team_id', $userEloRating->scorable_id)
+                        ->first()
+                        ->score;
+
+                    $oppScore = $event
+                        ->teamResults
+                        ->where('team_id', '!=', $userEloRating->scorable_id)
+                        ->first()
+                        ->score;
+
+                    if ($teamScore > $oppScore) {
+                        $userEloRating->wins++;
+                    } else {
+                        $userEloRating->losses++;
+                    }
+                });
+
+            $userEloRating->win_lose_percentage = round(($userEloRating->wins / ($userEloRating->wins + $userEloRating->losses) * 100), 0);
+
+            return $userEloRating;
+        });
+
+        $this->userEloRatings = $userEloRatings;
     }
 
     /**
