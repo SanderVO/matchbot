@@ -10,9 +10,6 @@ php artisan migrate
 # Clear cache
 php artisan optimize
 
-# Reload PHP to update opcache
-echo "" | sudo -S service php8.3-fpm reload
-
 # Reload services
 supervisorctl reload
 
