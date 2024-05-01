@@ -33,17 +33,16 @@ jobs:
 
       - name: Build frontend
         run: npm run production
-
+  
       - name: Deploy to server
-        uses: aburnett01/rsync-deployments@7.0.1
+        uses: contention/rsync-deployments@v2.0.0
         with:
-          switches: -avzr --delete
-          path: src/
-          remote_path: ${{ secrets.DEPLOY_PATH }}
-          remote_host: ${{ secrets.DEPLOY_HOST }}
-          remote_port: ${{ secrets.DEPLOY_PORT }}
-          remote_user: ${{ secrets.DEPLOY_USER }}
-          remote_key: ${{ secrets.DEPLOY_KEY }}
+          FLAGS: -avzr --delete
+          USER: ${{ secrets.DEPLOY_USER }}
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          LOCALPATH: ./
+          REMOTEPATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
 
       - name: Run deploy script
         uses: appleboy/ssh-action@master
