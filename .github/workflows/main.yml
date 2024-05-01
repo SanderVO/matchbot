@@ -37,7 +37,7 @@ jobs:
         run: npm install
 
       - name: Build frontend
-        run: npm run prod
+        run: npm run build
   
       - name: Deploy to server
         uses: contention/rsync-deployments@v2.0.0
