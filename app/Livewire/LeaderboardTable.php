@@ -4,8 +4,6 @@ namespace App\Livewire;
 
 use App\Models\Event;
 use App\Models\Team;
-use App\Models\TeamResult;
-use App\Models\User;
 use App\Models\UserEloRating;
 use Livewire\Component;
 use Livewire\WithPagination;
