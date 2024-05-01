@@ -54,4 +54,5 @@ jobs:
         with:
           username: ${{ secrets.DEPLOY_USER }}
           host: ${{ secrets.DEPLOY_HOST }}
+          key: ${{ secrets.DEPLOY_KEY }}
           script: "cd /var/www/matchbot-livewire && ./deploy.sh"
