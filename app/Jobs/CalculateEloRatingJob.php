@@ -56,8 +56,6 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
     {
         $event = Event::find($this->eventId);
 
-        DB::beginTransaction();
-
         $eloConfig = Config::get('elo');
 
         $userEventDataArray = collect([]);
@@ -214,6 +212,8 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
                     ->push($userEventData);
             }
         });
+
+        DB::beginTransaction();
 
         $userEventDataArray
             ->each(function ($userEventData) {

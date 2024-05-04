@@ -2,10 +2,10 @@
 set -e
 
 # Enter maintenance mode
-(php artisan down --message 'The app is being (quickly!) updated. Please try again in a minute.') || true
+(php artisan down) || true
 
 # Migrate
-php artisan migrate
+php artisan migrate --no-interaction --force
 
 # Clear cache
 php artisan optimize
@@ -17,7 +17,7 @@ php artisan pulse:restart
 echo "" | sudo /bin/systemctl reload php8.3-fpm.service
 
 # Reload services
-supervisorctl reload
+sudo supervisorctl reload
 
 # Exit maintenance mode
 php artisan up
