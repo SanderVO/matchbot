@@ -18,9 +18,9 @@ return new class extends Migration
             $table->text('comment')->nullable();
             $table->tinyInteger('status');
             $table->dateTime('start_date');
-            $table->dateTime('end_date');
-            $table->unsignedBigInteger('event_type_id');
-            $table->unsignedBigInteger('season_id');
+            $table->dateTime('end_date')->nullable();
+            $table->unsignedBigInteger('event_type_id')->nullable();
+            $table->unsignedBigInteger('season_id')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
