@@ -3,7 +3,6 @@
 namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Support\Facades\Schedule as FacadeSchedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
@@ -16,7 +15,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        FacadeSchedule::command('telescope:prune')->daily();
+        $schedule->command('telescope:prune')->daily();
     }
 
     /**
