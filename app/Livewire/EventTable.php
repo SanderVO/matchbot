@@ -34,7 +34,8 @@ class EventTable extends Component
                 'created_at',
                 'desc'
             )
-            ->paginate();
+            ->paginate()
+            ->setPath(route('events.index'));
     }
 
     public function destroyEvent(int $eventId)

@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Event;
 use App\Models\TeamResult;
 use App\Models\TeamResultUser;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -111,7 +112,8 @@ class UpdateEvent extends Component
             ->where('id', $this->event->id)
             ->update([
                 'status' => 1,
-                'comment' => $this->comment
+                'comment' => $this->comment,
+                'end_date' => $this->event->end_date ?? Carbon::now()
             ]);
 
         foreach ($this->teamResults as $teamResult) {

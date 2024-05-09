@@ -52,7 +52,8 @@ class TeamTable extends Component
                 'name',
                 'asc'
             )
-            ->paginate();
+            ->paginate()
+            ->setPath(route('teams.index'));
     }
 
     /**
