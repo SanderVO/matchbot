@@ -4,6 +4,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\SeasonController;
+use App\Http\Controllers\TeamController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +24,11 @@ Route::get('/', function () {
 });
 
 Route::resource('users', UserController::class)
+    ->only([
+        'index'
+    ]);
+
+Route::resource('teams', TeamController::class)
     ->only([
         'index'
     ]);

@@ -2,10 +2,6 @@
     <table class="table-auto w-full mb-4 bg-slate-900 border-slate-800 border-4 rounded-lg">
         <thead class="border-b-4 border-slate-800">
             <tr class="text-green-white">
-                <th class="text-left p-4 color-gray">
-                    ID
-                </th>
-
                 <th class="text-left p-4">
                     Team
                 </th>
@@ -31,10 +27,6 @@
         <tbody>
             @forelse ($userEloRatings as $userEloRating)
             <tr class="text-white-">
-                <td class="text-left p-4 ">
-                    {{ $userEloRating->id }}
-                </td>
-
                 <td class="text-left p-4">
                     {{ $userEloRating->scorable->name }}
                 </td>

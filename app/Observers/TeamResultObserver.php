@@ -12,7 +12,7 @@ class TeamResultObserver
     /**
      * On saved team result listener
      *
-     * @param Event $event
+     * @param TeamResult $teamResult
      * 
      * @author Sander van Ooijen <sandervo+github@proton.me>
      * @version 1.0.0

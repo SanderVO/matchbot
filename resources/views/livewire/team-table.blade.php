@@ -7,48 +7,40 @@
                 </th>
 
                 <th class="text-left p-4">
-                    Events
+                    Players
                 </th>
 
                 <th class="text-left p-4">
                     Created at
                 </th>
-
-                <th class="text-left p-4">
-                </th>
             </tr>
         </thead>
 
         <tbody>
-            @forelse ($seasons as $season)
+            @forelse ($teams as $index => $team)
             <tr>
                 <td class="text-left p-4">
-                    {{ $season->name }}
+                    <span contenteditable="true"
+                        wire:keydown.enter='updateTeam({{ $team->id }}, $event.target.textContent)'>{{
+                        $team->name
+                        }}</span>
                 </td>
 
                 <td class="text-left p-4">
-                    {{ $season->events_count }}
+                    {{ $team->users_count }}
                 </td>
 
                 <td class="text-left p-4">
-                    {{ $season->created_at }}
-                </td>
-
-                <td>
-                    @if ($season->events_count === 0)
-                    <button
-                        class="p-2 border rounded border-red-500 bg-red-600 hover:bg-red-500 transition-bg duration-300 ease-in-out"
-                        wire:click='destroySeason({{ $season->id }})'>X</button>
-                    @endif
+                    {{ $team->created_at }}
                 </td>
             </tr>
             @empty
             <tr>
-                <td class="p-4">No seasons found</td>
+                <td class="p-4">No teams found</td>
             </tr>
             @endforelse
         </tbody>
     </table>
 
-    {{ $seasons->links('pagination::tailwind') }}
+    {{ $teams->links('pagination::tailwind') }}
 </div>

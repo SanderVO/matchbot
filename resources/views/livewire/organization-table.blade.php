@@ -3,10 +3,6 @@
         <thead class="border-b-4 border-slate-800">
             <tr>
                 <th class="text-left p-4">
-                    ID
-                </th>
-
-                <th class="text-left p-4">
                     Name
                 </th>
 
@@ -23,10 +19,6 @@
         <tbody>
             @forelse ($organizations as $organization)
             <tr>
-                <td class="text-left p-4">
-                    {{ $organization->id }}
-                </td>
-
                 <td class="text-left p-4">
                     {{ $organization->name }}
                 </td>

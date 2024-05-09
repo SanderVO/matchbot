@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Event;
 use App\Models\Team;
 use App\Models\UserEloRating;
+use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -15,6 +16,7 @@ class LeaderboardTable extends Component
     protected $userEloRatings;
 
     public $userIsActive = true;
+    public $daysBack = null;
 
     /**
      * Mount component
@@ -48,6 +50,21 @@ class LeaderboardTable extends Component
                     ->where('scorable_type', Team::class)
                     ->groupBy('scorable_id');
             })
+            ->when(
+                isset($this->daysBack),
+                function ($query) {
+                    $startDate = Carbon::now()->subDays($this->daysBack);
+
+                    $query
+                        ->whereHas(
+                            'event',
+                            function ($query) use ($startDate) {
+                                $query
+                                    ->where('start_date', '>', $startDate->format('Y-m-d'));
+                            }
+                        );
+                }
+            )
             ->when(
                 $this->userIsActive,
                 function ($query) {

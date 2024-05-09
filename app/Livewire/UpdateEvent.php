@@ -110,6 +110,7 @@ class UpdateEvent extends Component
         Event::query()
             ->where('id', $this->event->id)
             ->update([
+                'status' => 1,
                 'comment' => $this->comment
             ]);
 

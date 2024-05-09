@@ -2,10 +2,6 @@
     <table class="table-auto w-full mb-4 bg-slate-900 border-slate-800 border-4 rounded-lg">
         <thead class="border-b-4 border-slate-800">
             <tr class="text-green-white">
-                <th class="text-left p-4 color-gray">
-                    ID
-                </th>
-
                 <th class="text-left p-4">
                     Team
                 </th>
@@ -42,10 +38,6 @@
         <tbody>
             @forelse ($events as $event)
             <tr class="text-white-">
-                <td class="text-left p-4 ">
-                    {{ $event->id }}
-                </td>
-
                 <td class="text-left p-4">
                     <a href="/events/{{ $event->id }}">
                         {{ $event->teamResults[0]->team->name }} - {{ $event->teamResults[1]->team->name }}

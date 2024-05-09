@@ -24,11 +24,19 @@ class SeasonTable extends Component
     public function loadSeasons()
     {
         $this->seasons = Season::query()
+            ->withCount('events')
             ->orderBy(
                 'name',
                 'asc'
             )
             ->paginate();
+    }
+
+    public function destroySeason(int $seasonId)
+    {
+        Season::destroy($seasonId);
+
+        $this->loadSeasons();
     }
 
     public function render()

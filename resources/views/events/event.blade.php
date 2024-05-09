@@ -15,6 +15,12 @@
         @endforeach
     </h1>
 
+    @if ($event->comment)
+    <div class="bg-slate-800 border border-slate-600 rounded p-4 w-full mb-8">
+        {{ $event->comment }}
+    </div>
+    @endif
+
     <div class="flex flex-col sm:flex-row mb-8 m-auto">
         @foreach ($event->teamResults as $teamResult)
         <div class="flex flex-col bg-slate-800 border border-slate-600 rounded p-4 w-full first:mr-4">
