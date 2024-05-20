@@ -21,6 +21,22 @@
                 <th class="text-left p-4">
                     +-
                 </th>
+
+                <th class="text-left p-4">
+                    Crawl Score
+                </th>
+
+                <th class="text-left p-4">
+                    Avg. Score
+                </th>
+
+                <th class="text-left p-4">
+                    Form
+                </th>
+
+                <th class="text-left p-4">
+                    Streak
+                </th>
             </tr>
         </thead>
 
@@ -48,6 +64,26 @@
                 <td
                     class="text-left p-4 {{ $userEloRating->elo_rating_difference >= 0 ? 'text-green-400' : 'text-red-400' }}">
                     {{ $userEloRating->elo_rating_difference }}
+                </td>
+
+                <td class="text-left p-4 font-bold">
+                    {{ $userEloRating->total_crawl_score }}
+                </td>
+
+                <td class="text-left p-4 font-bold">
+                    {{ $userEloRating->avg_score }}
+                </td>
+
+                <td class="text-left p-4 font-bold">
+                    @foreach ($userEloRating->streak as $result)
+                    <span class="{{ $result === 'W' ? 'text-green-400' : 'text-red-400' }}">{{ $result }}</span>
+                    @endforeach
+                </td>
+
+                <td class="text-left p-4 font-bold">
+                    <span
+                        class="{{ $userEloRating->current_streak_type === 'W' ? 'text-green-400' : 'text-red-400' }}">{{
+                        $userEloRating->current_streak_type }}{{ $userEloRating->current_streak }}</span>
                 </td>
             </tr>
             @empty

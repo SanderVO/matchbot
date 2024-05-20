@@ -88,8 +88,13 @@ class LeaderboardTable extends Component
                 }
             )
             ->with([
-                'scorable',
-                'event.teamResults'
+                'event.teamResults',
+                'scorable' => function ($query) {
+                    $query
+                        ->morphWith([
+                            Team::class => ['results']
+                        ]);
+                }
             ])
             ->orderBy('elo_rating', 'DESC')
             ->paginate()
@@ -98,6 +103,13 @@ class LeaderboardTable extends Component
         $userEloRatings->through(function (UserEloRating $userEloRating) {
             $userEloRating->wins = 0;
             $userEloRating->losses = 0;
+
+            $streak = [];
+            $currentStreak = 0;
+            $currentStreakType = null;
+            $currentStreakFlag = false;
+
+            $userEloRating->streak = [];
 
             Event::query()
                 ->where('status', 1)
@@ -111,8 +123,9 @@ class LeaderboardTable extends Component
                 ->with([
                     'teamResults'
                 ])
+                ->orderBy('start_date', 'DESC')
                 ->get()
-                ->each(function (Event $event) use (&$userEloRating) {
+                ->each(function (Event $event) use (&$userEloRating, &$streak, &$currentStreak, &$currentStreakType, &$currentStreakFlag) {
                     $teamScore = $event
                         ->teamResults
                         ->where('team_id', $userEloRating->scorable_id)
@@ -127,12 +140,52 @@ class LeaderboardTable extends Component
 
                     if ($teamScore > $oppScore) {
                         $userEloRating->wins++;
+
+                        if (count($streak) < 5) {
+                            $streak[] = 'W';
+                        }
+
+                        if (!isset($currentStreakType)) {
+                            $currentStreakType = 'W';
+                        }
+
+                        if (!$currentStreakFlag) {
+                            if ($currentStreakType === 'W') {
+                                $currentStreak += 1;
+                            } else {
+                                $currentStreakFlag = true;
+                            }
+                        }
                     } else {
                         $userEloRating->losses++;
+
+                        if (count($streak) < 5) {
+                            $streak[] = 'L';
+                        }
+
+                        if (!isset($currentStreakType)) {
+                            $currentStreakType = 'L';
+                        }
+
+                        if (!$currentStreakFlag) {
+                            if ($currentStreakType === 'L') {
+                                $currentStreak += 1;
+                            } else {
+                                $currentStreakFlag = true;
+                            }
+                        }
                     }
                 });
 
+            $userEloRating->streak = $streak;
+            $userEloRating->current_streak = $currentStreak;
+            $userEloRating->current_streak_type = $currentStreakType;
+
             $userEloRating->win_lose_percentage = round(($userEloRating->wins / ($userEloRating->wins + $userEloRating->losses) * 100), 0);
+
+            $userEloRating->total_crawl_score = $userEloRating->scorable->results->sum('crawl_score');
+            $userEloRating->total_score = $userEloRating->scorable->results->sum('score');
+            $userEloRating->avg_score = round($userEloRating->scorable->results->sum('score') / $userEloRating->scorable->results->count('score'), 1);
 
             return $userEloRating;
         });
