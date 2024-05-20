@@ -5,9 +5,10 @@ namespace App\Observers;
 use App\Jobs\CalculateEloRatingJob;
 use App\Models\Event;
 use App\Models\TeamResult;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 use Illuminate\Database\Eloquent\Collection;
 
-class TeamResultObserver
+class TeamResultObserver implements ShouldHandleEventsAfterCommit
 {
     /**
      * On saved team result listener

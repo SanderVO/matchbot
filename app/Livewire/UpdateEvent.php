@@ -117,12 +117,17 @@ class UpdateEvent extends Component
             ]);
 
         foreach ($this->teamResults as $teamResult) {
-            TeamResult::query()
+            $teamResultModel = TeamResult::query()
                 ->where('id', $teamResult['id'])
-                ->update([
+                ->first();
+
+            $teamResultModel
+                ->fill([
                     'score' => +$teamResult['score'],
                     'crawl_score' => +$teamResult['crawl_score']
                 ]);
+
+            $teamResultModel->save();
 
             foreach ($teamResult['team_result_users'] as $teamResultUser) {
                 TeamResultUser::query()

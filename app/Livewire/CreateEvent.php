@@ -46,14 +46,20 @@ class CreateEvent extends Component
             ->orderBy('name')
             ->get();
 
+        $this->sportId = $this->sports[0]->id;
+
         $this->seasons = Season::query()
             ->orderBy('name')
             ->get();
+
+        $this->seasonId = $this->seasons[0]->id;
 
         $this->users = User::query()
             ->where('status', 1)
             ->orderBy('name')
             ->get();
+
+        $this->getEventTypes();
     }
 
     /**
@@ -138,7 +144,8 @@ class CreateEvent extends Component
                 $teamIds = [];
 
                 for ($keyCounter = 0; $keyCounter < $userTeamAmount; $keyCounter++) {
-                    $randomKey = $this->getRandomKey($userIds);
+                    shuffle($userIds);
+                    $randomKey = array_rand($userIds);
                     $teamIds[] = $userIds[$randomKey];
                     unset($userIds[$randomKey]);
                     $userIds = array_values($userIds);
@@ -206,6 +213,8 @@ class CreateEvent extends Component
         $this->types = EventType::query()
             ->where('event_type_sport_id', $this->sportId)
             ->get();
+
+        $this->eventTypeId = $this->types[0]->id;
     }
 
     /**
@@ -228,21 +237,6 @@ class CreateEvent extends Component
     public function userRemoved(int $userId)
     {
         $this->userIds = array_diff($this->userIds, [$userId]);
-    }
-
-    /**
-     * Get a random key from array and return key
-     *
-     * @param array $userIds
-     * 
-     * @return int
-     * 
-     * @author Sander van Ooijen <sandervo+github@proton.me>
-     * @version 1.0.0
-     */
-    private function getRandomKey(array $userIds): int
-    {
-        return mt_rand(0, count($userIds) - 1);
     }
 
     /**
