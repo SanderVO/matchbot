@@ -131,6 +131,8 @@ class CreateEvent extends Component
 
         $userIds = $this->userIds;
 
+        shuffle($userIds);
+
         if ($eventType->min_teams === $eventType->max_teams) {
             $teamAmount = $eventType->min_teams;
             $userTeamAmount = $eventType->min_players / $teamAmount;
@@ -144,8 +146,7 @@ class CreateEvent extends Component
                 $teamIds = [];
 
                 for ($keyCounter = 0; $keyCounter < $userTeamAmount; $keyCounter++) {
-                    shuffle($userIds);
-                    $randomKey = array_rand($userIds);
+                    $randomKey = random_int(0, count($userIds) - 1);
                     $teamIds[] = $userIds[$randomKey];
                     unset($userIds[$randomKey]);
                     $userIds = array_values($userIds);
