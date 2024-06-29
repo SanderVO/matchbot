@@ -149,14 +149,13 @@ class LeaderboardTable extends Component
                                 }
                             )
                             ->with([
-                                'teamResults.teamResultUsers',
-                                'teamResults.team',
+                                'teamResults.team.users',
                             ]);
                     }
                 )
                 ->orderBy('start_date', 'DESC')
                 ->get()
-                ->each(function (Event $event) use (&$userEloRating, &$streak, &$currentStreak, &$currentStreakType, &$currentStreakFlag) {
+                ->each(function (Event $event) use (&$userEloRating, &$streak, &$currentStreak, &$currentStreakType, &$currentStreakFlag, &$defEvents) {
                     $teamScore = $event
                         ->teamResults
                         ->when(
@@ -171,10 +170,8 @@ class LeaderboardTable extends Component
                                         return $teamResult
                                             ->team
                                             ->users
-                                            ->filter(function (User $user) use ($userEloRating) {
-                                                return $user->id === $userEloRating->scorable_id;
-                                            })
-                                            ->count() > 0;
+                                            ->where('id',  $userEloRating->scorable_id)
+                                            ->first();
                                     });
                             },
                         )
@@ -185,9 +182,15 @@ class LeaderboardTable extends Component
                         ->teamResults
                         ->when(
                             $this->scorableType === Team::class,
-                            function (Collection $teamResults) use ($userEloRating) {
+                            function (Collection $teamResults) use ($event, $userEloRating) {
+                                $oppId = $event
+                                    ->teamResults
+                                    ->where('team_id', '!=', $userEloRating->scorable_id)
+                                    ->first()
+                                    ->team_id;
+
                                 return $teamResults
-                                    ->where('team_id', '!=', $userEloRating->scorable_id);
+                                    ->where('team_id', $oppId);
                             },
                             function (Collection $teamResults) use ($userEloRating) {
                                 return $teamResults
@@ -195,10 +198,8 @@ class LeaderboardTable extends Component
                                         return $teamResult
                                             ->team
                                             ->users
-                                            ->filter(function (User $user) use ($userEloRating) {
-                                                return $user->id !== $userEloRating->scorable_id;
-                                            })
-                                            ->count() > 0;
+                                            ->where('id', '!=', $userEloRating->scorable_id)
+                                            ->count() === 2;
                                     });
                             },
                         )
@@ -224,7 +225,7 @@ class LeaderboardTable extends Component
                             }
                         }
                     } else {
-                        $userEloRating->losses++;
+                        $userEloRating->losses = $userEloRating->losses + 1;
 
                         if (count($streak) < 5) {
                             $streak[] = 'L';
