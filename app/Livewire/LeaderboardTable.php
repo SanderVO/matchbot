@@ -4,8 +4,12 @@ namespace App\Livewire;
 
 use App\Models\Event;
 use App\Models\Team;
+use App\Models\TeamResult;
+use App\Models\TeamResultUser;
+use App\Models\User;
 use App\Models\UserEloRating;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -17,6 +21,7 @@ class LeaderboardTable extends Component
 
     public $userIsActive = true;
     public $daysBack = null;
+    public $scorableType = Team::class;
 
     /**
      * Mount component
@@ -40,14 +45,14 @@ class LeaderboardTable extends Component
         $userEloRatings =  UserEloRating::query()
             ->whereNull('objectable_type')
             ->whereNull('objectable_id')
-            ->where('scorable_type', Team::class)
+            ->where('scorable_type', $this->scorableType)
             ->whereIn('id', function ($query) {
                 $query
                     ->selectRaw('MAX(id)')
                     ->from('user_elo_ratings')
                     ->whereNull('objectable_type')
                     ->whereNull('objectable_id')
-                    ->where('scorable_type', Team::class)
+                    ->where('scorable_type', $this->scorableType)
                     ->groupBy('scorable_id');
             })
             ->when(
@@ -71,18 +76,23 @@ class LeaderboardTable extends Component
                     $query
                         ->whereHasMorph(
                             'scorable',
-                            Team::class,
-                            function ($query) {
-                                $query
-                                    ->whereHas(
-                                        'users',
-                                        function ($query) {
-                                            $query
-                                                ->where('status', 1);
-                                        },
-                                        '=',
-                                        2
-                                    );
+                            [Team::class, User::class],
+                            function ($query, $type) {
+                                if ($type === Team::class) {
+                                    $query
+                                        ->whereHas(
+                                            'users',
+                                            function ($query) {
+                                                $query
+                                                    ->where('status', 1);
+                                            },
+                                            '=',
+                                            2
+                                        );
+                                } else {
+                                    $query
+                                        ->where('status', 1);
+                                }
                             }
                         );
                 }
@@ -92,7 +102,8 @@ class LeaderboardTable extends Component
                 'scorable' => function ($query) {
                     $query
                         ->morphWith([
-                            Team::class => ['results']
+                            Team::class => ['results'],
+                            User::class => ['teamResultUsers.teamResult']
                         ]);
                 }
             ])
@@ -113,28 +124,85 @@ class LeaderboardTable extends Component
 
             Event::query()
                 ->where('status', 1)
-                ->whereHas(
-                    'teamResults',
+                ->when(
+                    $this->scorableType === Team::class,
                     function ($query) use ($userEloRating) {
                         $query
-                            ->where('team_id', $userEloRating->scorable_id);
+                            ->whereHas(
+                                'teamResults',
+                                function ($query) use ($userEloRating) {
+                                    $query
+                                        ->where('team_id', $userEloRating->scorable_id);
+                                }
+                            )
+                            ->with([
+                                'teamResults.team'
+                            ]);
+                    },
+                    function ($query) use ($userEloRating) {
+                        $query
+                            ->whereHas(
+                                'teamResults.teamResultUsers',
+                                function ($query) use ($userEloRating) {
+                                    $query
+                                        ->where('user_id', $userEloRating->scorable_id);
+                                }
+                            )
+                            ->with([
+                                'teamResults.team.users',
+                            ]);
                     }
                 )
-                ->with([
-                    'teamResults'
-                ])
                 ->orderBy('start_date', 'DESC')
                 ->get()
-                ->each(function (Event $event) use (&$userEloRating, &$streak, &$currentStreak, &$currentStreakType, &$currentStreakFlag) {
+                ->each(function (Event $event) use (&$userEloRating, &$streak, &$currentStreak, &$currentStreakType, &$currentStreakFlag, &$defEvents) {
                     $teamScore = $event
                         ->teamResults
-                        ->where('team_id', $userEloRating->scorable_id)
+                        ->when(
+                            $this->scorableType === Team::class,
+                            function (Collection $teamResults) use ($userEloRating) {
+                                return $teamResults
+                                    ->where('team_id', $userEloRating->scorable_id);
+                            },
+                            function (Collection $teamResults) use ($userEloRating) {
+                                return $teamResults
+                                    ->filter(function (TeamResult $teamResult) use ($userEloRating) {
+                                        return $teamResult
+                                            ->team
+                                            ->users
+                                            ->where('id',  $userEloRating->scorable_id)
+                                            ->first();
+                                    });
+                            },
+                        )
                         ->first()
                         ->score;
 
                     $oppScore = $event
                         ->teamResults
-                        ->where('team_id', '!=', $userEloRating->scorable_id)
+                        ->when(
+                            $this->scorableType === Team::class,
+                            function (Collection $teamResults) use ($event, $userEloRating) {
+                                $oppId = $event
+                                    ->teamResults
+                                    ->where('team_id', '!=', $userEloRating->scorable_id)
+                                    ->first()
+                                    ->team_id;
+
+                                return $teamResults
+                                    ->where('team_id', $oppId);
+                            },
+                            function (Collection $teamResults) use ($userEloRating) {
+                                return $teamResults
+                                    ->filter(function (TeamResult $teamResult) use ($userEloRating) {
+                                        return $teamResult
+                                            ->team
+                                            ->users
+                                            ->where('id', '!=', $userEloRating->scorable_id)
+                                            ->count() === 2;
+                                    });
+                            },
+                        )
                         ->first()
                         ->score;
 
@@ -157,7 +225,7 @@ class LeaderboardTable extends Component
                             }
                         }
                     } else {
-                        $userEloRating->losses++;
+                        $userEloRating->losses = $userEloRating->losses + 1;
 
                         if (count($streak) < 5) {
                             $streak[] = 'L';
@@ -181,16 +249,41 @@ class LeaderboardTable extends Component
             $userEloRating->current_streak = $currentStreak;
             $userEloRating->current_streak_type = $currentStreakType;
 
-            $userEloRating->win_lose_percentage = round(($userEloRating->wins / ($userEloRating->wins + $userEloRating->losses) * 100), 0);
+            if ($userEloRating->wins > 0) {
+                $userEloRating->win_lose_percentage = round(($userEloRating->wins / ($userEloRating->wins + $userEloRating->losses) * 100), 0);
+            } else {
+                $userEloRating->win_lose_percentage = 0;
+            }
 
-            $userEloRating->total_crawl_score = $userEloRating->scorable->results->sum('crawl_score');
-            $userEloRating->total_score = $userEloRating->scorable->results->sum('score');
-            $userEloRating->avg_score = round($userEloRating->scorable->results->sum('score') / $userEloRating->scorable->results->count('score'), 1);
+            if ($this->scorableType === Team::class) {
+                $userEloRating->total_crawl_score = $userEloRating->scorable->results->sum('crawl_score');
+                $userEloRating->total_score = $userEloRating->scorable->results->sum('score');
+                $userEloRating->avg_score = round($userEloRating->scorable->results->sum('score') / $userEloRating->scorable->results->count('score'), 1);
+            } else {
+                $userEloRating->total_crawl_score = $userEloRating->scorable->teamResultUsers->sum('teamResult.crawl_score');
+                $userEloRating->total_score = $userEloRating->scorable->teamResultUsers->sum('teamResult.score');
+                $userEloRating->avg_score = round($userEloRating->scorable->teamResultUsers->sum('teamResult.score') / $userEloRating->scorable->teamResultUsers->count('teamResult.score'), 1);
+            }
 
             return $userEloRating;
         });
 
         $this->userEloRatings = $userEloRatings;
+    }
+
+    /**
+     * Load leaderboard again on scorable type change
+     * 
+     * @param string $scorableType
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
+     */
+    public function onScorableTypeChange(string $scorableType)
+    {
+        $this->scorableType = $scorableType;
+
+        $this->loadLeaderboard();
     }
 
     /**
