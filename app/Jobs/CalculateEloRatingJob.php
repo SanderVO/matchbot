@@ -73,7 +73,7 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
             ])
             ->get();
 
-        $teamResults->each(function (TeamResult $teamResult) use ($event, $eventTypes, $eloConfig, $userEventDataArray) {
+        $teamResults->each(function (TeamResult $teamResult) use ($event, $eventTypes, $eloConfig, $userEventDataArray, $teamResults) {
             foreach ($eventTypes as $eventType) {
                 $objectableType = $eventType === 'type' ? EventType::class : ($eventType === 'sport' ? EventTypeSport::class : null);
                 $objectableId = $eventType === 'type' ? $event->eventType->id : ($eventType === 'sport' ? $event->eventType->sport->id : null);
@@ -106,6 +106,7 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
                             )
                             ->orderBy(
                                 Event::selectRaw('start_date')
+                                    ->where('status', 1)
                                     ->whereColumn('user_elo_ratings.event_id', 'events.id'),
                                 'DESC'
                             )
@@ -130,6 +131,7 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
                                         )
                                         ->orderBy(
                                             Event::selectRaw('start_date')
+                                                ->where('status', 1)
                                                 ->whereColumn('user_elo_ratings.event_id', 'events.id'),
                                             'DESC'
                                         )
@@ -155,7 +157,8 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
                     });
 
 
-                // Team ELO rating
+
+                // Team ELO rating 
                 $lastEloRating = optional(UserEloRating::query()
                     ->where('objectable_type', $objectableType)
                     ->where('objectable_id', $objectableId)
@@ -170,17 +173,23 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
                     )
                     ->orderBy(
                         Event::selectRaw('start_date')
+                            ->where('status', 1)
                             ->whereColumn('user_elo_ratings.event_id', 'events.id'),
                         'DESC'
                     )
                     ->first())
                     ->elo_rating ?? $eloConfig['defaultRating'];
 
+                $opponentId = $teamResults
+                    ->where('team_id', '!=', $teamResult->team_id)
+                    ->first()
+                    ->team_id;
+
                 $opponentEloRating = optional(UserEloRating::query()
                     ->where('objectable_type', $objectableType)
                     ->where('objectable_id', $objectableId)
                     ->where('scorable_type', Team::class)
-                    ->where('scorable_id', '!=', $teamResult->team_id)
+                    ->where('scorable_id', $opponentId)
                     ->whereHas(
                         'event',
                         function ($query) use ($event) {
@@ -190,6 +199,7 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
                     )
                     ->orderBy(
                         Event::selectRaw('start_date')
+                            ->where('status', 1)
                             ->whereColumn('user_elo_ratings.event_id', 'events.id'),
                         'DESC'
                     )
