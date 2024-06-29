@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[ObservedBy([TeamResultObserver::class])]
 class TeamResult extends Model
@@ -63,6 +64,19 @@ class TeamResult extends Model
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class, 'event_id');
+    }
+
+    /**
+     * Team result user relationship
+     *
+     * @return HasOne
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
+     */
+    public function teamResultUser(): HasOne
+    {
+        return $this->hasOne(TeamResultUser::class, 'team_result_id');
     }
 
     /**
