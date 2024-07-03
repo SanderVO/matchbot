@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\UserEloRating;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -19,20 +20,11 @@ class LeaderboardTable extends Component
 
     protected $userEloRatings;
 
+    #[Url]
+    public string $scorableType = Team::class;
+
     public $userIsActive = true;
     public $daysBack = null;
-    public $scorableType = Team::class;
-
-    /**
-     * Mount component
-     * 
-     * @author Sander van Ooijen <sandervo+github@proton.me>
-     * @version 1.0.0
-     */
-    public function mount()
-    {
-        $this->loadLeaderboard();
-    }
 
     /**
      * Load users
@@ -294,6 +286,8 @@ class LeaderboardTable extends Component
      */
     public function render()
     {
+        $this->loadLeaderboard();
+
         return view(
             'livewire.leaderboard-table',
             [

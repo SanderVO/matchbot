@@ -1,6 +1,7 @@
 <div>
     <div class="mb-4">
-        <select class="bg-slate-900 border-slate-800" wire:change='onScorableTypeChange($event.target.value)'>
+        <select class="bg-slate-900 border-slate-800" wire:model="scorableType"
+            wire:change='onScorableTypeChange($event.target.value)'>
             <option value="App\Models\Team">Teams</option>
             <option value="App\Models\User">Players</option>
         </select>

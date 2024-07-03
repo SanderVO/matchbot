@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use Illuminate\Contracts\View\View as FacadeView;
 use Illuminate\Support\Facades\View;
+use Livewire\WithPagination;
 
 class EventController extends Controller
 {
+    use WithPagination;
+
     /**
      * Display a listing of the resource.
      *
