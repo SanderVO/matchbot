@@ -132,7 +132,7 @@ class EventTable extends Component
     {
         $this->userId = null;
 
-        $this->teamId = $teamId;
+        $this->teamId = $teamId !== 0 ? $teamId : null;
 
         $this->loadEvents();
     }
@@ -149,7 +149,7 @@ class EventTable extends Component
     {
         $this->teamId = null;
 
-        $this->userId = $userId;
+        $this->userId = $userId !== 0 ? $userId : null;
 
         $this->loadEvents();
     }

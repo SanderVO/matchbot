@@ -2,7 +2,7 @@
     <div class="mb-4">
         <select wire:model="teamId" class="bg-slate-900 border-slate-800 mr-4 cursor-pointer"
             wire:change.live='onTeamChange($event.target.value)'>
-            <option value="null">Select team</option>
+            <option value="0">Select team</option>
             @foreach ($teams as $team)
             <option value="{{ $team->id }}">{{ $team->name }}</option>
             @endforeach
@@ -10,7 +10,7 @@
 
         <select wire:model="userId" class="bg-slate-900 border-slate-800 cursor-pointer"
             wire:change.live='onUserChange($event.target.value)'>
-            <option value="null">Select player</option>
+            <option value="0">Select player</option>
             @foreach ($users as $user)
             <option value="{{ $user->id }}">{{ $user->name }}</option>
             @endforeach
