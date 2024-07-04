@@ -23,6 +23,7 @@
             <option value="">Select result type</option>
             <option value="maxCrawls">Max crawls</option>
             <option value="human">Human centipede</option>
+            <option value="overtime">Overtime</option>
         </select>
     </div>
 

@@ -93,6 +93,19 @@ class EventTable extends Component
                                         2
                                     );
                             }
+                        )
+                        ->when(
+                            $this->resultType === 'overtime',
+                            function ($query) {
+                                $query
+                                    ->whereHas(
+                                        'teamResults',
+                                        function ($query) {
+                                            $query
+                                                ->where('score', '>', 10);
+                                        }
+                                    );
+                            }
                         );
                 }
             )
