@@ -104,6 +104,7 @@ class LeaderboardTable extends Component
             ->setPath(route('leaderboard.index'));
 
         $userEloRatings->through(function (UserEloRating $userEloRating) {
+            $userEloRating->played = 0;
             $userEloRating->wins = 0;
             $userEloRating->losses = 0;
 
@@ -148,6 +149,8 @@ class LeaderboardTable extends Component
                 ->orderBy('start_date', 'DESC')
                 ->get()
                 ->each(function (Event $event) use (&$userEloRating, &$streak, &$currentStreak, &$currentStreakType, &$currentStreakFlag, &$defEvents) {
+                    $userEloRating->played++;
+
                     $teamScore = $event
                         ->teamResults
                         ->when(
@@ -250,11 +253,13 @@ class LeaderboardTable extends Component
             if ($this->scorableType === Team::class) {
                 $userEloRating->total_crawl_score = $userEloRating->scorable->results->sum('crawl_score');
                 $userEloRating->total_score = $userEloRating->scorable->results->sum('score');
-                $userEloRating->avg_score = round($userEloRating->scorable->results->sum('score') / $userEloRating->scorable->results->count('score'), 1);
+                $userEloRating->avg_score = round($userEloRating->scorable->results->sum('score') / $userEloRating->scorable->results->count(), 1);
+                $userEloRating->avg_crawl = round($userEloRating->scorable->results->sum('crawl_score') / $userEloRating->scorable->results->count(), 1);
             } else {
                 $userEloRating->total_crawl_score = $userEloRating->scorable->teamResultUsers->sum('teamResult.crawl_score');
                 $userEloRating->total_score = $userEloRating->scorable->teamResultUsers->sum('teamResult.score');
                 $userEloRating->avg_score = round($userEloRating->scorable->teamResultUsers->sum('teamResult.score') / $userEloRating->scorable->teamResultUsers->count('teamResult.score'), 1);
+                $userEloRating->avg_crawl = round($userEloRating->scorable->teamResultUsers->sum('teamResult.crawl_score') / $userEloRating->scorable->teamResultUsers->count('teamResult.crawl_score'), 1);
             }
 
             return $userEloRating;

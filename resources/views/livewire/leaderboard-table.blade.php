@@ -16,6 +16,10 @@
                     </th>
 
                     <th class="text-left p-4">
+                        Played
+                    </th>
+
+                    <th class="text-left p-4">
                         W/L
                     </th>
 
@@ -24,7 +28,7 @@
                     </th>
 
                     <th class="text-left p-4">
-                        ELO Rating
+                        ELO
                     </th>
 
                     <th class="text-left p-4">
@@ -33,6 +37,10 @@
 
                     <th class="text-left p-4">
                         Crawl Score
+                    </th>
+
+                    <th class="text-left p-4">
+                        Avg. Crawl
                     </th>
 
                     <th class="text-left p-4">
@@ -57,6 +65,10 @@
                     </td>
 
                     <td class="text-left p-4">
+                        {{ $userEloRating->played }}
+                    </td>
+
+                    <td class="text-left p-4">
                         <span class="text-green-400">W{{ $userEloRating->wins }}</span> - <span class="text-red-400">L{{
                             $userEloRating->losses }}</span>
                     </td>
@@ -78,6 +90,10 @@
 
                     <td class="text-left p-4 font-bold">
                         {{ $userEloRating->total_crawl_score }}
+                    </td>
+
+                    <td class="text-left p-4 font-bold">
+                        {{ $userEloRating->avg_crawl }}
                     </td>
 
                     <td class="text-left p-4 font-bold">

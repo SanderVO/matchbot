@@ -19,6 +19,9 @@ class EventTable extends Component
     #[Url]
     public ?int $userId;
 
+    #[Url]
+    public ?string $resultType;
+
     protected $events = [];
     protected $teams = [];
     protected $users = [];
@@ -55,6 +58,40 @@ class EventTable extends Component
                             function ($query) {
                                 $query
                                     ->where('id', $this->userId);
+                            }
+                        );
+                }
+            )
+            ->when(
+                isset($this->resultType),
+                function ($query) {
+                    $query
+                        ->when(
+                            $this->resultType === 'maxCrawls',
+                            function ($query) {
+                                $query
+                                    ->whereHas(
+                                        'teamResults',
+                                        function ($query) {
+                                            $query
+                                                ->where('crawl_score', 4);
+                                        }
+                                    );
+                            }
+                        )
+                        ->when(
+                            $this->resultType === 'human',
+                            function ($query) {
+                                $query
+                                    ->whereHas(
+                                        'teamResults',
+                                        function ($query) {
+                                            $query
+                                                ->where('crawl_score', '>', 0);
+                                        },
+                                        '=',
+                                        2
+                                    );
                             }
                         );
                 }
@@ -150,6 +187,21 @@ class EventTable extends Component
         $this->teamId = null;
 
         $this->userId = $userId !== 0 ? $userId : null;
+
+        $this->loadEvents();
+    }
+
+    /**
+     * Load events again on result type change
+     * 
+     * @param string $resultType
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
+     */
+    public function onResultTypeChange(string $resultType)
+    {
+        $this->resultType = $resultType !== '' ? $resultType : null;
 
         $this->loadEvents();
     }

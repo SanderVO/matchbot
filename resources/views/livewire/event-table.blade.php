@@ -1,6 +1,7 @@
 <div>
     <div class="mb-4">
-        <select wire:model="teamId" class="bg-slate-900 border-slate-800 mr-4 cursor-pointer"
+        <select wire:model="teamId"
+            class="bg-slate-900 border-slate-800 mr-0 lg:mr-4 mb-4 lg:mb-0 cursor-pointer w-100 lg:w-auto"
             wire:change.live='onTeamChange($event.target.value)'>
             <option value="0">Select team</option>
             @foreach ($teams as $team)
@@ -8,12 +9,20 @@
             @endforeach
         </select>
 
-        <select wire:model="userId" class="bg-slate-900 border-slate-800 cursor-pointer"
+        <select wire:model="userId"
+            class="bg-slate-900 border-slate-800 mr-0 lg:mr-4 mb-4 lg:mb-0 cursor-pointer w-100 lg:w-auto"
             wire:change.live='onUserChange($event.target.value)'>
             <option value="0">Select player</option>
             @foreach ($users as $user)
             <option value="{{ $user->id }}">{{ $user->name }}</option>
             @endforeach
+        </select>
+
+        <select wire:model="resultType" class="bg-slate-900 border-slate-800 cursor-pointer"
+            wire:change.live='onResultTypeChange($event.target.value)'>
+            <option value="">Select result type</option>
+            <option value="maxCrawls">Max crawls</option>
+            <option value="human">Human centipede</option>
         </select>
     </div>
 
@@ -39,10 +48,6 @@
 
                     <th class="text-left p-4">
                         Sport
-                    </th>
-
-                    <th class="text-left p-4">
-                        Season
                     </th>
 
                     <th class="text-left p-4">
@@ -77,10 +82,6 @@
 
                     <td class="text-left p-4">
                         {{ $event->eventType->sport->name }}
-                    </td>
-
-                    <td class="text-left p-4">
-                        {{ $event->season->name }}
                     </td>
 
                     <td class="text-left p-4">
