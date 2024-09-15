@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Event;
+use App\Models\Season;
 use App\Models\Team;
 use App\Models\User;
 use Livewire\Component;
@@ -20,11 +21,15 @@ class EventTable extends Component
     public ?int $userId;
 
     #[Url]
+    public ?int $seasonId;
+
+    #[Url]
     public ?string $resultType;
 
     protected $events = [];
     protected $teams = [];
     protected $users = [];
+    protected $seasons = [];
 
     /**
      * Load events
@@ -60,6 +65,13 @@ class EventTable extends Component
                                     ->where('id', $this->userId);
                             }
                         );
+                }
+            )
+            ->when(
+                isset($this->seasonId),
+                function ($query) {
+                    $query
+                        ->where('season_id', $this->seasonId);
                 }
             )
             ->when(
@@ -158,6 +170,19 @@ class EventTable extends Component
     }
 
     /**
+     * Load seasons for dropdown
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
+     */
+    public function loadSeasons()
+    {
+        $this->seasons = Season::query()
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
      * Remove event
      * 
      * @author Sander van Ooijen <sandervo+github@proton.me>
@@ -220,6 +245,23 @@ class EventTable extends Component
     }
 
     /**
+     * Load seasons again on player change
+     * 
+     * @param int $seasonId
+     * 
+     * @author Sander van Ooijen <sandervo+github@proton.me>
+     * @version 1.0.0
+     */
+    public function onSeasonChange(int $seasonId)
+    {
+        $this->seasonId = null;
+
+        $this->seasonId = $seasonId !== 0 ? $seasonId : null;
+
+        $this->loadEvents();
+    }
+
+    /**
      * Render component
      * 
      * @author Sander van Ooijen <sandervo+github@proton.me>
@@ -230,13 +272,15 @@ class EventTable extends Component
         $this->loadEvents();
         $this->loadTeams();
         $this->loadUsers();
+        $this->loadSeasons();
 
         return view(
             'livewire.event-table',
             [
                 'events' => $this->events,
                 'teams' => $this->teams,
-                'users' => $this->users
+                'users' => $this->users,
+                'seasons' => $this->seasons
             ]
         );
     }

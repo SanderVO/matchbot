@@ -18,12 +18,21 @@
             @endforeach
         </select>
 
-        <select wire:model="resultType" class="bg-slate-900 border-slate-800 cursor-pointer"
+        <select wire:model="resultType"
+            class="bg-slate-900 border-slate-800 mr-0 lg:mr-4 mb-4 lg:mb-0 cursor-pointer w-100 lg:w-auto"
             wire:change.live='onResultTypeChange($event.target.value)'>
             <option value="">Select result type</option>
             <option value="maxCrawls">Max crawls</option>
             <option value="human">Human centipede</option>
             <option value="overtime">Overtime</option>
+        </select>
+
+        <select wire:model="seasonId" class="bg-slate-900 border-slate-800 cursor-pointer w-100 lg:w-auto"
+            wire:change.live='onSeasonChange($event.target.value)'>
+            <option value="0">Select season</option>
+            @foreach ($seasons as $season)
+            <option value="{{ $season->id }}">{{ $season->name }}</option>
+            @endforeach
         </select>
     </div>
 
