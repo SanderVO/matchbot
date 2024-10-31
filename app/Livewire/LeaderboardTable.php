@@ -253,13 +253,19 @@ class LeaderboardTable extends Component
             if ($this->scorableType === Team::class) {
                 $userEloRating->total_crawl_score = $userEloRating->scorable->results->sum('crawl_score');
                 $userEloRating->total_score = $userEloRating->scorable->results->sum('score');
-                $userEloRating->avg_score = round($userEloRating->scorable->results->sum('score') / $userEloRating->scorable->results->count(), 1);
-                $userEloRating->avg_crawl = round($userEloRating->scorable->results->sum('crawl_score') / $userEloRating->scorable->results->count(), 1);
+                $userEloRating->avg_score = round($userEloRating->scorable->results->sum('score') / $userEloRating->scorable->results->count(), 2);
+                $userEloRating->avg_crawl = round($userEloRating->scorable->results->sum('crawl_score') / $userEloRating->scorable->results->count(), 2);
+
+                $userEloRating->scorable->original_name = $userEloRating->scorable->users->map(function ($user) {
+                    return $user->name;
+                })->implode(' + ');
             } else {
                 $userEloRating->total_crawl_score = $userEloRating->scorable->teamResultUsers->sum('teamResult.crawl_score');
                 $userEloRating->total_score = $userEloRating->scorable->teamResultUsers->sum('teamResult.score');
-                $userEloRating->avg_score = round($userEloRating->scorable->teamResultUsers->sum('teamResult.score') / $userEloRating->scorable->teamResultUsers->count('teamResult.score'), 1);
-                $userEloRating->avg_crawl = round($userEloRating->scorable->teamResultUsers->sum('teamResult.crawl_score') / $userEloRating->scorable->teamResultUsers->count('teamResult.crawl_score'), 1);
+                $userEloRating->avg_score = round($userEloRating->scorable->teamResultUsers->sum('teamResult.score') / $userEloRating->scorable->teamResultUsers->count('teamResult.score'), 2);
+                $userEloRating->avg_crawl = round($userEloRating->scorable->teamResultUsers->sum('teamResult.crawl_score') / $userEloRating->scorable->teamResultUsers->count('teamResult.crawl_score'), 2);
+
+                $userEloRating->scorable->original_name = $userEloRating->scorable->name;
             }
 
             return $userEloRating;

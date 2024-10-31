@@ -49,7 +49,7 @@
                 </td>
 
                 <td class="text-left p-4">
-                    {{ $user->created_at }}
+                    {{ $user->created_at->format('d-m-Y, H:i') }}
                 </td>
             </tr>
             @empty

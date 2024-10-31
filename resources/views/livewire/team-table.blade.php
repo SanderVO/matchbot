@@ -21,7 +21,8 @@
             <tr>
                 <td class="text-left p-4">
                     <span contenteditable="true"
-                        wire:keydown.enter='updateTeam({{ $team->id }}, $event.target.textContent)'>{{
+                        wire:keydown.enter='updateTeam({{ $team->id }}, $event.target.textContent)'
+                        title='{{ $team->users[0]->name }} + {{ $team->users[1]->name }}'>{{
                         $team->name
                         }}</span>
                 </td>
@@ -31,7 +32,7 @@
                 </td>
 
                 <td class="text-left p-4">
-                    {{ $team->created_at }}
+                    {{ $team->created_at->format('d-m-Y, H:i') }}
                 </td>
             </tr>
             @empty

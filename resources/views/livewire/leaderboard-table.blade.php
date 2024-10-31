@@ -60,7 +60,7 @@
             <tbody>
                 @forelse ($userEloRatings as $userEloRating)
                 <tr class="text-white-">
-                    <td class="text-left p-4">
+                    <td class="text-left p-4" title="{{ $userEloRating->scorable->original_name }}">
                         {{ $userEloRating->scorable->name }}
                     </td>
 

@@ -28,7 +28,7 @@
                 </td>
 
                 <td class="text-left p-4">
-                    {{ $organization->created_at }}
+                    {{ $organization->created_at->format('d-m-Y, H:i') }}
                 </td>
             </tr>
             @empty

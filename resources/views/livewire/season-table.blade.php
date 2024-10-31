@@ -31,7 +31,7 @@
                 </td>
 
                 <td class="text-left p-4">
-                    {{ $season->created_at }}
+                    {{ $season->created_at->format('d-m-Y, H:i') }}
                 </td>
 
                 <td>
