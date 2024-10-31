@@ -1,17 +1,6 @@
 <div>
     <div class="mb-4">
-        <select wire:model="season"
-            class="bg-slate-900 border-slate-800 mr-0 lg:mr-4 mb-4 lg:mb-0 cursor-pointer w-100 lg:w-auto"
-            wire:change='onSeasonChange($event.target.value)'>
-            <option value="overall">Overall</option>
-            <option value="noSanderSeason">No-Sander Season</option>
-            {{--@foreach ($seasons as $season)
-            <option value="{{ $season->id }}"></option>
-            @endforeach--}}
-        </select>
-
-        <select wire:model="scorableType"
-            class="bg-slate-900 border-slate-800 mr-0 lg:mr-4 mb-4 lg:mb-0 cursor-pointer w-100 lg:w-auto"
+        <select class="bg-slate-900 border-slate-800" wire:model="scorableType"
             wire:change='onScorableTypeChange($event.target.value)'>
             <option value="App\Models\Team">Teams</option>
             <option value="App\Models\User">Players</option>
@@ -71,9 +60,7 @@
             <tbody>
                 @forelse ($userEloRatings as $userEloRating)
                 <tr class="text-white-">
-                    <td
-                        class="text-left p-4"
-                        title="{{ $userEloRating->scorable->original_name }}">
+                    <td class="text-left p-4" title="{{ $userEloRating->scorable->original_name }}">
                         {{ $userEloRating->scorable->name }}
                     </td>
 
