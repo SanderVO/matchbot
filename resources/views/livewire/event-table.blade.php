@@ -74,16 +74,32 @@
                 <tr class="text-white-">
                     <td class="text-left p-4">
                         <a href="/events/{{ $event->id }}">
-                            {{ $event->teamResults[0]->team->name }} - {{ $event->teamResults[1]->team->name }}
+                            <span class="{{ $event->teamResults[0]->score > $event->teamResults[1]->score ? 'font-bold text-green-500' : '' }}">
+                                {{ $event->teamResults[0]->team->name }}
+                            </span>
+                            -
+                            <span class="{{ $event->teamResults[1]->score > $event->teamResults[0]->score ? 'font-bold text-green-500' : '' }}">{{ $event->teamResults[1]->team->name }}</span>
                         </a>
                     </td>
 
                     <td class="text-left p-4">
                         {{ $event->teamResults[0]->score }} - {{ $event->teamResults[1]->score }}
+                        @if (($event->teamResults[0]->score === 10 && $event->teamResults[1]->score === 0) || ($event->teamResults[0]->score === 0 && $event->teamResults[1]->score === 10))
+                        ⭐
+                        @endif
+                        @if ($event->teamResults[0]->score === 0 && $event->teamResults[1]->score === 0)
+                        ❗
+                        @endif
+                        @if ($event->teamResults[0]->score > 10 || $event->teamResults[1]->score > 10)
+                        🕐
+                        @endif
                     </td>
 
                     <td class="text-left p-4">
                         {{ $event->teamResults[0]->crawl_score }} - {{ $event->teamResults[1]->crawl_score }}
+                        @if ($event->teamResults[0]->crawl_score > 0 && $event->teamResults[1]->crawl_score > 0)
+                        🐛
+                        @endif
                     </td>
 
                     <td class="text-left p-4">

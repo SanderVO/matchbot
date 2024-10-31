@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Models\Event;
 use App\Models\EventType;
 use App\Models\EventTypeSport;
-use App\Models\Organization;
 use App\Models\Season;
 use App\Models\Team;
 use App\Models\TeamResult;
@@ -130,8 +129,6 @@ class CreateEvent extends Component
         );
 
         $userIds = $this->userIds;
-
-        shuffle($userIds);
 
         if ($eventType->min_teams === $eventType->max_teams) {
             $teamAmount = $eventType->min_teams;

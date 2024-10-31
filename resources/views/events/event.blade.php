@@ -12,6 +12,9 @@
     <h1 class="h1 mb-8">
         @foreach ($event->teamResults as $teamResult)
         {{ $teamResult->team->name }}
+        @if (!$loop->last)
+        <b>VS</b>
+        @endif
         @endforeach
     </h1>
 

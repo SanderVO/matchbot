@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Models\Event;
 use App\Models\Team;
 use App\Models\TeamResult;
-use App\Models\TeamResultUser;
 use App\Models\User;
 use App\Models\UserEloRating;
 use Carbon\Carbon;
@@ -21,10 +20,15 @@ class LeaderboardTable extends Component
     protected $userEloRatings;
 
     #[Url]
+    public ?string $season = null;
     public string $scorableType = Team::class;
 
-    public $userIsActive = true;
-    public $daysBack = null;
+    public bool $userIsActive = true;
+    public ?int $daysBack = null;
+
+    // TODO
+    public bool $noSanderSeason = false;
+    public string $noSanderSeasonStartDate = '19-09-2024';
 
     /**
      * Load users
@@ -48,10 +52,9 @@ class LeaderboardTable extends Component
                     ->groupBy('scorable_id');
             })
             ->when(
-                isset($this->daysBack),
+                $this->noSanderSeason, // TODO
                 function ($query) {
-                    $startDate = Carbon::now()->subDays($this->daysBack);
-
+                    $startDate = Carbon::parse($this->noSanderSeasonStartDate);
                     $query
                         ->whereHas(
                             'event',
@@ -90,7 +93,18 @@ class LeaderboardTable extends Component
                 }
             )
             ->with([
-                'event.teamResults',
+                'event' => function ($query) {
+                    $query
+                        ->with(['teamResults'])
+                        ->when(
+                            $this->noSanderSeason, // TODO
+                            function ($query) {
+                                $startDate = Carbon::parse($this->noSanderSeasonStartDate);
+                                $query
+                                    ->where('start_date', '>', $startDate->format('Y-m-d'));
+                            }
+                        );
+                },
                 'scorable' => function ($query) {
                     $query
                         ->morphWith([
@@ -117,6 +131,14 @@ class LeaderboardTable extends Component
 
             Event::query()
                 ->where('status', 1)
+                ->when(
+                    $this->noSanderSeason, // TODO
+                    function ($query) {
+                        $startDate = Carbon::parse($this->noSanderSeasonStartDate);
+                        $query
+                            ->where('start_date', '>', $startDate->format('Y-m-d'));
+                    }
+                )
                 ->when(
                     $this->scorableType === Team::class,
                     function ($query) use ($userEloRating) {
@@ -253,19 +275,43 @@ class LeaderboardTable extends Component
             if ($this->scorableType === Team::class) {
                 $userEloRating->total_crawl_score = $userEloRating->scorable->results->sum('crawl_score');
                 $userEloRating->total_score = $userEloRating->scorable->results->sum('score');
-                $userEloRating->avg_score = round($userEloRating->scorable->results->sum('score') / $userEloRating->scorable->results->count(), 1);
-                $userEloRating->avg_crawl = round($userEloRating->scorable->results->sum('crawl_score') / $userEloRating->scorable->results->count(), 1);
+                $userEloRating->avg_score = round($userEloRating->scorable->results->sum('score') / $userEloRating->scorable->results->count(), 2);
+                $userEloRating->avg_crawl = round($userEloRating->scorable->results->sum('crawl_score') / $userEloRating->scorable->results->count(), 2);
+
+                $userEloRating->scorable->original_name = $userEloRating->scorable->users->map(function ($user) {
+                    return $user->name;
+                })->implode(' + ');
             } else {
                 $userEloRating->total_crawl_score = $userEloRating->scorable->teamResultUsers->sum('teamResult.crawl_score');
                 $userEloRating->total_score = $userEloRating->scorable->teamResultUsers->sum('teamResult.score');
-                $userEloRating->avg_score = round($userEloRating->scorable->teamResultUsers->sum('teamResult.score') / $userEloRating->scorable->teamResultUsers->count('teamResult.score'), 1);
-                $userEloRating->avg_crawl = round($userEloRating->scorable->teamResultUsers->sum('teamResult.crawl_score') / $userEloRating->scorable->teamResultUsers->count('teamResult.crawl_score'), 1);
+                $userEloRating->avg_score = round($userEloRating->scorable->teamResultUsers->sum('teamResult.score') / $userEloRating->scorable->teamResultUsers->count('teamResult.score'), 2);
+                $userEloRating->avg_crawl = round($userEloRating->scorable->teamResultUsers->sum('teamResult.crawl_score') / $userEloRating->scorable->teamResultUsers->count('teamResult.crawl_score'), 2);
+
+                $userEloRating->scorable->original_name = $userEloRating->scorable->name;
             }
 
             return $userEloRating;
         });
 
         $this->userEloRatings = $userEloRatings;
+    }
+
+    /**
+     * Load leaderboard again on season change
+     * 
+     * @param string $season
+     * 
+     * @author Koen Lukkien <klukkien@bettercollective.com>
+     * @version 1.0.0
+     */
+    public function onSeasonChange(string $season)
+    {
+        $this->season = $season;
+
+        // TODO
+        $this->noSanderSeason = $season === 'noSanderSeason';
+
+        $this->loadLeaderboard();
     }
 
     /**
