@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Config;
 class EloSupport
 {
     /**
-     * Calculate the elo rating based on scores and elo ratings for team
+     * Calculate the elo rating based on scores and elo ratings
      * According to: https://en.wikipedia.org/wiki/Elo_rating_system#Mathematical_details
      *
      * @param int $ownScore
@@ -19,7 +19,7 @@ class EloSupport
      * @author Sander van Ooijen <sandervo+github@proton.me>
      * @version 1.0.0
      */
-    public static function calculateTeamEloRating(int $ownScore, int $opponentScore, int $ownEloRating, int $opponentEloRating)
+    public static function calculateEloRating(int $ownScore, int $opponentScore, int $ownEloRating, int $opponentEloRating)
     {
         $eloConfig = Config::get('elo');
 
@@ -43,20 +43,9 @@ class EloSupport
      */
     public static function calculateTeamUserEloRating(int $ownScore, int $opponentScore, int $ownEloRating, Collection $opponentEloRatings)
     {
-        $eloConfig = Config::get('elo');
+        $opponentEloRating = $opponentEloRatings->avg();
 
-        $actualScore = +$opponentScore === +$ownScore ? $eloConfig['draw'] : (+$opponentScore > +$ownScore ? $eloConfig['lose'] : $eloConfig['win']);
-
-        $expectedScore = 0;
-
-        $opponentEloRatings
-            ->each(function (int $opponentEloRating) use (&$expectedScore, $ownEloRating) {
-                $expectedScore += self::calculateExpectedScore($opponentEloRating, $ownEloRating);
-            });
-
-        $expectedScore = $expectedScore / $opponentEloRatings->count();
-
-        return round(+$ownEloRating + $eloConfig['kFactor'] * (+$actualScore - +$expectedScore), 0);
+        return self::calculateEloRating($ownScore, $opponentScore, $ownEloRating, $opponentEloRating);
     }
 
     /**

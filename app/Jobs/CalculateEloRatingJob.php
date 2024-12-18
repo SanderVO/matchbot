@@ -101,7 +101,9 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
                                 'event',
                                 function ($query) use ($event) {
                                     $query
-                                        ->where('start_date', '<=', $event->start_date);
+                                        ->where('status', 1)
+                                        ->where('start_date', '<=', $event->start_date)
+                                        ->where('id', '!=', $event->id);
                                 }
                             )
                             ->orderBy(
@@ -126,7 +128,9 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
                                             'event',
                                             function ($query) use ($event) {
                                                 $query
-                                                    ->where('start_date', '<=', $event->start_date);
+                                                    ->where('status', 1)
+                                                    ->where('start_date', '<=', $event->start_date)
+                                                    ->where('id', '!=', $event->id);
                                             }
                                         )
                                         ->orderBy(
@@ -156,8 +160,6 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
                             ->push($userEventData);
                     });
 
-
-
                 // Team ELO rating 
                 $lastEloRating = optional(UserEloRating::query()
                     ->where('objectable_type', $objectableType)
@@ -168,7 +170,9 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
                         'event',
                         function ($query) use ($event) {
                             $query
-                                ->where('start_date', '<=', $event->start_date);
+                                ->where('status', 1)
+                                ->where('start_date', '<=', $event->start_date)
+                                ->where('id', '!=', $event->id);
                         }
                     )
                     ->orderBy(
@@ -194,7 +198,9 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
                         'event',
                         function ($query) use ($event) {
                             $query
-                                ->where('start_date', '<=', $event->start_date);
+                                ->where('status', 1)
+                                ->where('start_date', '<=', $event->start_date)
+                                ->where('id', '!=', $event->id);
                         }
                     )
                     ->orderBy(
@@ -206,7 +212,7 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
                     ->first())
                     ->elo_rating ?? $eloConfig['defaultRating'];
 
-                $newEloRating = EloSupport::calculateTeamEloRating(+$teamResult->score, +$opponentResult->score, +$lastEloRating, +$opponentEloRating);
+                $newEloRating = EloSupport::calculateEloRating(+$teamResult->score, +$opponentResult->score, +$lastEloRating, +$opponentEloRating);
 
                 $userEventData = [];
 
