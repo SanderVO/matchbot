@@ -93,14 +93,14 @@ class CreateEloRatingJobTest extends TestCase
             ]);
 
         // Act
-        $job = new CalculateEloRatingJob($event);
+        $job = new CalculateEloRatingJob($event->id);
         $job->handle();
 
         // Assert
         $eloRatings = UserEloRating::get();
 
-        $newTeamOwnEloRating = EloSupport::calculateTeamEloRating(+$teamResult->score, +$opponentTeamResult->score, +$eloConfig['defaultRating'], +$eloConfig['defaultRating']);
-        $opponentTeamOwnEloRating = EloSupport::calculateTeamEloRating(+$opponentTeamResult->score, +$teamResult->score, +$eloConfig['defaultRating'], +$eloConfig['defaultRating']);
+        $newTeamOwnEloRating = EloSupport::calculateEloRating(+$teamResult->score, +$opponentTeamResult->score, +$eloConfig['defaultRating'], +$eloConfig['defaultRating']);
+        $opponentTeamOwnEloRating = EloSupport::calculateEloRating(+$opponentTeamResult->score, +$teamResult->score, +$eloConfig['defaultRating'], +$eloConfig['defaultRating']);
 
         $this->assertEquals(
             $eloRatings
@@ -202,7 +202,7 @@ class CreateEloRatingJobTest extends TestCase
                 ]);
 
             // Act
-            $job = new CalculateEloRatingJob($event);
+            $job = new CalculateEloRatingJob($event->id);
             $job->handle();
         }
 
@@ -306,8 +306,8 @@ class CreateEloRatingJobTest extends TestCase
             ->first()
             ->elo_rating;
 
-        $newOwnEloRating = EloSupport::calculateTeamEloRating(+$ownScore, +$opponentScore, +$ownOldEloRating, +$opponentOldEloRating);
-        $newOpponentEloRating = EloSupport::calculateTeamEloRating(+$opponentScore, +$ownScore, +$opponentOldEloRating, +$ownOldEloRating);
+        $newOwnEloRating = EloSupport::calculateEloRating(+$ownScore, +$opponentScore, +$ownOldEloRating, +$opponentOldEloRating);
+        $newOpponentEloRating = EloSupport::calculateEloRating(+$opponentScore, +$ownScore, +$opponentOldEloRating, +$ownOldEloRating);
 
         $newOwnUserEloRating = EloSupport::calculateTeamUserEloRating(+$ownScore, +$opponentScore, +$ownOldEloRating, collect([+$opponentOldEloRating]));
         $newOpponentUserEloRating = EloSupport::calculateTeamUserEloRating(+$opponentScore, +$ownScore, +$opponentOldEloRating, collect([+$ownOldEloRating]));

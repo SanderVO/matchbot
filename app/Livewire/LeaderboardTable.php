@@ -40,12 +40,33 @@ class LeaderboardTable extends Component
             ->where('scorable_type', $this->scorableType)
             ->whereIn('id', function ($query) {
                 $query
-                    ->selectRaw('MAX(id)')
-                    ->from('user_elo_ratings')
+                    ->selectRaw('id')
+                    ->from('user_elo_ratings AS uer')
                     ->whereNull('objectable_type')
                     ->whereNull('objectable_id')
                     ->where('scorable_type', $this->scorableType)
-                    ->groupBy('scorable_id');
+                    ->where('event_id', function ($query) {
+                        $query
+                            ->select('events.id')
+                            ->from('events')
+                            ->join('team_results', 'events.id', '=', 'team_results.event_id')
+                            ->when(
+                                $this->scorableType === Team::class,
+                                function ($query) {
+                                    $query
+                                        ->whereRaw('team_results.team_id = uer.scorable_id');
+                                },
+                                function ($query) {
+                                    $query
+                                        ->join('team_result_users', 'team_results.id', '=', 'team_result_users.team_result_id')
+                                        ->whereRaw('team_result_users.user_id = uer.scorable_id');
+                                }
+                            )
+                            ->where('events.status', 1)
+                            ->orderBy('events.start_date', 'DESC')
+                            ->limit(1);
+                    })
+                    ->groupBy('id');
             })
             ->when(
                 isset($this->daysBack),
