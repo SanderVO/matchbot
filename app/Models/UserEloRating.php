@@ -23,7 +23,8 @@ class UserEloRating extends Model
         'objectable_id',
         'scorable_type',
         'scorable_id',
-        'event_id'
+        'event_id',
+        'event_start_date',
     ];
 
     /**

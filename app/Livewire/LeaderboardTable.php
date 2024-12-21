@@ -35,39 +35,20 @@ class LeaderboardTable extends Component
     public function loadLeaderboard()
     {
         $userEloRatings =  UserEloRating::query()
-            ->whereNull('objectable_type')
-            ->whereNull('objectable_id')
-            ->where('scorable_type', $this->scorableType)
-            ->whereIn('id', function ($query) {
-                $query
-                    ->selectRaw('id')
-                    ->from('user_elo_ratings AS uer')
-                    ->whereNull('objectable_type')
-                    ->whereNull('objectable_id')
-                    ->where('scorable_type', $this->scorableType)
-                    ->where('event_id', function ($query) {
-                        $query
-                            ->select('events.id')
-                            ->from('events')
-                            ->join('team_results', 'events.id', '=', 'team_results.event_id')
-                            ->when(
-                                $this->scorableType === Team::class,
-                                function ($query) {
-                                    $query
-                                        ->whereRaw('team_results.team_id = uer.scorable_id');
-                                },
-                                function ($query) {
-                                    $query
-                                        ->join('team_result_users', 'team_results.id', '=', 'team_result_users.team_result_id')
-                                        ->whereRaw('team_result_users.user_id = uer.scorable_id');
-                                }
-                            )
-                            ->where('events.status', 1)
-                            ->orderBy('events.start_date', 'DESC')
-                            ->limit(1);
-                    })
-                    ->groupBy('id');
-            })
+            ->joinSub(
+                UserEloRating::selectRaw('uer2.scorable_id, MAX(uer2.event_start_date) AS latest_event_date')
+                    ->from('user_elo_ratings AS uer2')
+                    ->groupBy('uer2.scorable_id'),
+                'latest',
+                function ($join) {
+                    $join
+                        ->on('user_elo_ratings.scorable_id', '=', 'latest.scorable_id')
+                        ->on('user_elo_ratings.event_start_date', '=', 'latest.latest_event_date');
+                }
+            )
+            ->whereNull('user_elo_ratings.objectable_type')
+            ->whereNull('user_elo_ratings.objectable_id')
+            ->where('user_elo_ratings.scorable_type', $this->scorableType)
             ->when(
                 isset($this->daysBack),
                 function ($query) {
@@ -120,7 +101,7 @@ class LeaderboardTable extends Component
                         ]);
                 }
             ])
-            ->orderBy('elo_rating', 'DESC')
+            ->orderBy('user_elo_ratings.elo_rating', 'DESC')
             ->paginate()
             ->setPath(route('leaderboard.index'));
 

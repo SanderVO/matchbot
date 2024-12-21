@@ -150,7 +150,8 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
 
                         $userEventData['elo_rating'] = $newEloRating;
                         $userEventData['elo_rating_difference'] = +$newEloRating - +$userEloRating;
-                        $userEventData['event_id'] = $teamResult->event_id;
+                        $userEventData['event_id'] = $event->id;
+                        $userEventData['event_start_date'] = $event->start_date;
                         $userEventData['scorable_type'] = User::class;
                         $userEventData['scorable_id'] = $teamResultUser->user_id;
                         $userEventData['objectable_type'] = $objectableType;
@@ -218,7 +219,8 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
 
                 $userEventData['elo_rating'] = $newEloRating;
                 $userEventData['elo_rating_difference'] = +$newEloRating - +$lastEloRating;
-                $userEventData['event_id'] = $teamResult->event_id;
+                $userEventData['event_id'] = $event->id;
+                $userEventData['event_start_date'] = $event->start_date;
                 $userEventData['scorable_type'] = Team::class;
                 $userEventData['scorable_id'] = $teamResult->team_id;
                 $userEventData['objectable_type'] = $objectableType;
@@ -236,6 +238,7 @@ class CalculateEloRatingJob implements ShouldQueue, ShouldBeUnique
                 UserEloRating::updateOrCreate(
                     [
                         'event_id' => $userEventData['event_id'],
+                        'event_start_date' => $userEventData['event_start_date'],
                         'objectable_type' => $userEventData['objectable_type'],
                         'objectable_id' => $userEventData['objectable_id'],
                         'scorable_type' => $userEventData['scorable_type'],
